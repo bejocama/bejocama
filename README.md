@@ -219,15 +219,6 @@ The *composer* allows the comosition of a variable list of fundtions.
 References
 ----------
 
-> ### Ideas to perfect forwading into lambda captures ###
+> ### Additional information -- still in progress ###
 
-> <http://nvwa.cvs.sourceforge.net/viewvc/nvwa/nvwa/functional.h?view=markup>
-
-> ### Universal References -- Working with tags ###
-
-> <Https://mortoray.com/2013/06/03/overriding-the-broken-universal-reference-t>
-
-> ### Function traits ideas 
-
-> <https://gist.github.com/duckie>
-
+> <http://www.bejocama.de>
