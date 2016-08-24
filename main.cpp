@@ -27,7 +27,7 @@ namespace bejocama
 	template<typename T>
 	void print_file(const char* fn)
 	{
-		composer(fopen,fstat,mmap<T>,make_file<T>(),&file<T>::make_list,print<T>())(fn,0,0);
+		composer(fopen,fstat,mmap<T>,make_file<T>(),&file<T>::make_list,print<T>())(io(fn),0,0);
 	}
 	
 
@@ -35,7 +35,7 @@ namespace bejocama
 	void save(const char* fn, T&& t)
 	{
 		composer(fopen,fstat,ftruncate<T>,fstat,mmap<T>,fcopy<T>,fclose)
-			(fn,1,-1,1,std::forward<T>(t));
+			(io(fn),1,-1,1,std::forward<T>(t));
 	}
 }
 

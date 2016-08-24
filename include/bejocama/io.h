@@ -75,10 +75,8 @@ namespace bejocama
 		int _mode = O_RDWR | O_CREAT;
 	};
 
-	maybe<io> fopen(const string& fn)
+	maybe<io> fopen(io&& i)
 	{
-		io i(fn);
-
 		i._fd = open(i._fn(), i._mode , (mode_t)0600);
 		
 		if (i._fd == -1) {

@@ -23,11 +23,10 @@
 #include "bejocama/base.h"
 #include "bejocama/iterator.h"
 #include "bejocama/io.h"
+#include "bejocama/file.h"
 
 namespace bejocama
 {
-	template<typename T> struct file;
-	
 	namespace internal
 	{
 		template<typename T> struct iterator;
@@ -262,6 +261,19 @@ namespace bejocama
 				return reinterpret_cast<T*>(_io._map.start + _io._map.poff + _io._map.len);
 			}
 
+			maybe<bejocama::file<T>> append(T&& t) override
+			{
+				return composer
+					(fclose,
+					 fopen,
+					 fstat,
+					 ftruncate<T>,
+					 fstat,mmap<T>,
+					 fcopy<T>,
+					 make_file<T>())
+					(std::move(_io),1,-1,1,std::forward<T>(t));
+			}
+			
 			bejocama::io _io;
 		};
 	}

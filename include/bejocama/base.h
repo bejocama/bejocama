@@ -68,6 +68,8 @@ namespace bejocama
 			virtual T* begin() const = 0;
 
 			virtual T* end() const  = 0;
+
+			virtual maybe<bejocama::file<T>> append(T&&) = 0;
 		};
 	}
 
