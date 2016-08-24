@@ -1,8 +1,8 @@
 BEJOCAMA - A C++ functional extension library
 =============================================
 
-Preface (source code is comming soon)
--------------------------------------
+Preface
+-------
 
 The intention of this library is to develop a coding pattern, which
 implementation results in a function - the *composer*:
