@@ -27,7 +27,6 @@ namespace bejocama
 	template<typename> struct iterator;
 	template<typename> struct list;
 	template<typename> struct file;
-	struct io;
 
 	namespace base
 	{
@@ -75,7 +74,7 @@ namespace bejocama
 	namespace internal
 	{
 		template<typename,typename> struct list;
-		template<typename,typename> struct file;
+		template<typename> struct file;
 		
 		template<typename>
 		struct factory;
@@ -101,7 +100,7 @@ namespace bejocama
 			{
 				using TT = typename bejocama::clear_type<T>::type;
 
-				return new file<TT,bejocama::io>(std::forward<U>(u));
+				return new file<TT>(std::forward<U>(u));
 			}
 		};
 	}

@@ -22,13 +22,11 @@
 #include <cstring>
 #include "bejocama/base.h"
 #include "bejocama/iterator.h"
+#include "bejocama/io.h"
 
 namespace bejocama
 {
-	struct io;
 	template<typename T> struct file;
-	template<typename T> struct maybe;
-	maybe<io> fclose(io&&);
 	
 	namespace internal
 	{
@@ -235,12 +233,12 @@ namespace bejocama
 			bejocama::file<T> _p;
 		};
 		
-		template<typename T, typename IO = bejocama::io>
+		template<typename T>
 		struct file : bejocama::base::file<T>
 		{
 			using value_type = T;
 
-			file(const IO& i) : _io(i) {}
+			file(const bejocama::io& i) : _io(i) {}
 
 			~file()
 			{
@@ -264,7 +262,7 @@ namespace bejocama
 				return reinterpret_cast<T*>(_io._map.start + _io._map.poff + _io._map.len);
 			}
 
-			IO _io;
+			bejocama::io _io;
 		};
 	}
 }
