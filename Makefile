@@ -17,7 +17,7 @@
 
 CPP := main.cpp
 
-.PHONY: prog
+.PHONY: program
 program:
 	g++ -std=c++14 -o $@ $(CPP) -Iinclude
 
