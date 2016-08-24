@@ -159,4 +159,18 @@ namespace bejocama
 
 		return utility::composer<tag<way>>()(std::forward<F>(f)...);
 	}
+
+	template<typename F>
+	decltype(auto) curry(F&& f)
+	{
+		return [ff=wrapper<F>(std::forward<F>(f))](auto&& a) {
+
+			auto g = [b=wrapper<decltype(a)>(std::forward<decltype(a)>(a))] () {
+
+				return b;
+			};
+
+			return compose<0>(ff,g);
+		};
+	}
 }
