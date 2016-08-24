@@ -121,38 +121,42 @@ namespace bejocama
 
 		return compose_at<tag<way>,P>()(std::forward<G>(g), std::forward<F>(f));
 	}
-	
+
 	template<typename... F>
 	decltype(auto) composer(F&&... f);
 
-	template<typename T>
-	struct ___composer;
-
-	template<>
-	struct ___composer<tag<char>>
+	namespace utility
 	{
-		template<typename F, typename G, typename... H>
-		decltype(auto) operator()(F&& f, G&& g, H&&... h)
-		{
-			return composer(compose<0>(std::forward<G>(g), std::forward<F>(f)),std::forward<H>(h)...);
-		}
-	};
+		template<typename T>
+		struct composer;
 
-	template<>
-	struct ___composer<tag<bool>>
-	{
-		template<typename F, typename G>
-		decltype(auto) operator()(F&& f, G&& g)
+		template<>
+		struct composer<tag<char>>
 		{
-			return compose<0>(std::forward<G>(g), std::forward<F>(f));
-		}
-	};
+			template<typename F, typename G, typename... H>
+				decltype(auto) operator()(F&& f, G&& g, H&&... h)
+			{
+				return bejocama::composer
+					(compose<0>(std::forward<G>(g), std::forward<F>(f)),std::forward<H>(h)...);
+			}
+		};
+
+		template<>
+		struct composer<tag<bool>>
+		{
+			template<typename F, typename G>
+				decltype(auto) operator()(F&& f, G&& g)
+			{
+				return bejocama::compose<0>(std::forward<G>(g), std::forward<F>(f));
+			}
+		};
+	}
 
 	template<typename... F>
 	decltype(auto) composer(F&&... f)
 	{
 		using way = typename std::conditional<(sizeof...(F) > 2), char, bool>::type;
 
-		return ___composer<tag<way>>()(std::forward<F>(f)...);
+		return utility::composer<tag<way>>()(std::forward<F>(f)...);
 	}
 }
