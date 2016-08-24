@@ -52,7 +52,10 @@ namespace bejocama
 		using type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
 	};
 
-	//wrapper for perfect forwading into catures
+	//
+	// wrapper for perfect forwading into catures - found at
+	// <http://nvwa.cvs.sourceforge.net/viewvc/nvwa/nvwa/functional.h?view=markup>
+	//
 	template <typename _Tp,
 			  bool _Deep_copy = std::is_rvalue_reference<_Tp>::value ||
 			  (std::is_lvalue_reference<_Tp>::value &&
