@@ -27,8 +27,8 @@ namespace bejocama
 	template<typename F>
 	struct function_traits
 	{
-		using rtype = typename function_traits<decltype(&clear_type<F>::type::operator())>::rtype;
-		using atype = typename function_traits<decltype(&clear_type<F>::type::operator())>::atype;
+		using rtype = typename function_traits<decltype(&F::operator())>::rtype;
+		using atype = typename function_traits<decltype(&F::operator())>::atype;
 	
 		template<size_t P, size_t N>
 		using args = typename tl_sub<atype,P,N>::type;
@@ -96,22 +96,12 @@ namespace bejocama
 	};
 
 	template<typename R, typename C, typename F, typename... A>
-	struct is_member_of_return_type<R(C::*)(A...) const, F>
-	{		
-		using RT = typename function_traits<F>::rtype;
-
-		using VT = typename RT::value_type;
-		
-		static constexpr bool value = std::is_same<C,VT>::value;
+	struct is_member_of_return_type<R(C::*)(A...) const, F> : std::true_type
+	{
 	};
 
 	template<typename R, typename C, typename F, typename... A>
-	struct is_member_of_return_type<R(C::*)(A...), F>
+	struct is_member_of_return_type<R(C::*)(A...), F> : std::true_type
 	{
-		using RT = typename function_traits<F>::rtype;
-
-		using VT = typename RT::value_type;
-		
-		static constexpr bool value = std::is_same<C,VT>::value;
 	};
 }

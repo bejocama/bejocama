@@ -24,9 +24,8 @@
 
 namespace bejocama
 {
-
 	template<typename T>
-	void print_file(const char* fn)
+	void print_file_test1(const char* fn)
 	{
 		using t_make_list = list<T>(file<T>::*)();
 
@@ -38,20 +37,9 @@ namespace bejocama
 				 method,
 				 print<T>())(io(fn),0,0);
 	}
-	
-	template<typename T>
-	void save(const char* fn, T&& t)
-	{
-		composer(fopen,fstat,ftruncate<T>,fstat,mmap<T>,fcopy<T>,fclose)
-			(io(fn),1,-1,1,std::forward<T>(t));
-	}
 }
 
-int main(int argc, char** argv)
+void test1()
 {
-	bejocama::save<client>("client.data",client{"tom", "orlando", .age=20,.height=178});
-
-	bejocama::print_file<client>("client.data");
-	
-	return 0;
+	bejocama::print_file_test1<client>("client.data");
 }

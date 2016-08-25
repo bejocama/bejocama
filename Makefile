@@ -17,9 +17,25 @@
 
 CPP := main.cpp
 
-.PHONY: program
-program:
-	g++ -std=c++14 -o $@ $(CPP) -Iinclude
+TEST_CPP := $(notdir $(wildcard test/*.cpp))
+
+TEST_OBJ := $(patsubst %.cpp, %.o, $(TEST_CPP))
+
+INCLUDE := -Iinclude -Itest
+
+VPATH := test
+
+.PHONY: program test
+
+program: $(TEST_OBJ)
+	g++ -std=c++14 -o $@ $(CPP) $(INCLUDE)
 
 test:
 	./program
+
+clean:
+	rm -f program *.data
+
+#compile tests -- objects not needed
+%.o: %.cpp
+	g++ -std=c++14 -c $< $(INCLUDE) -o /dev/null

@@ -82,18 +82,18 @@ namespace bejocama
 	template<size_t P>
 	struct compose_at<tag<bool>,P>
 	{
-		template<typename F, typename G>
-		decltype(auto) operator()(F&& f, G&& g)
+		template<typename G, typename F>
+		decltype(auto) operator()(G&& g, F&& f)
 		{
-			constexpr auto N = function_traits<F>::atype::size;
+			constexpr auto N = function_traits<typename clear_type<G>::type>::atype::size;
 
-			using BEFORE = typename function_traits<F>::template args<0,P>;
-			using AFTER = typename function_traits<F>::template args<P+1,N-P-1>;
-			using AT = typename function_traits<F>::template args<P,1>;
-			using REPLACE = typename function_traits<G>::atype;
+			using BEFORE = typename function_traits<typename clear_type<G>::type>::template args<0,P>;
+			using AFTER = typename function_traits<typename clear_type<G>::type>::template args<P+1,N-P-1>;
+			using AT = typename function_traits<typename clear_type<G>::type>::template args<P,1>;
+			using REPLACE = typename function_traits<typename clear_type<F>::type>::atype;
 
-			return compose_typed<P>(std::forward<F>(f),
-									std::forward<G>(g),
+			return compose_typed<P>(std::forward<G>(g),
+									std::forward<F>(f),
 									tag<REPLACE,BEFORE,AT,AFTER>{});
 		}
 	};
@@ -104,8 +104,8 @@ namespace bejocama
 		template<typename G, typename F>
 		decltype(auto) operator()(G&& g, F&& f)
 		{
-			using METHOD = typename function_traits<G>::atype;
-			using OBJECT = typename function_traits<F>::atype;
+			using METHOD = typename function_traits<typename clear_type<G>::type>::atype;
+			using OBJECT = typename function_traits<typename clear_type<F>::type>::atype;
 	
 			return compose_object_typed<P>(std::forward<G>(g),
 										   std::forward<F>(f),
@@ -117,7 +117,8 @@ namespace bejocama
 	decltype(auto) compose(G&& g, F&& f)
 	{
 		using way = typename std::conditional
-			<is_member_of_return_type<G,F>::value, char, bool>::type;
+			<is_member_of_return_type<typename clear_type<G>::type,
+									  typename clear_type<F>::type>::value, char, bool>::type;
 
 		return compose_at<tag<way>,P>()(std::forward<G>(g), std::forward<F>(f));
 	}
