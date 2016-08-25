@@ -24,10 +24,15 @@
 namespace bejocama
 {
 	template<typename T>
-	struct iterator : std::unique_ptr<base::iterator<T>>
+	struct iterator : safe_unique_ptr<base::iterator<T>>
 	{
+		iterator(const iterator& it)
+			: safe_unique_ptr<base::iterator<T>>(it->clone())
+		{
+		}
+
 		iterator(base::iterator<T>* i)
-			: std::unique_ptr<base::iterator<T>>(i)
+			: safe_unique_ptr<base::iterator<T>>(i)
 		{
 		}
 
@@ -41,12 +46,24 @@ namespace bejocama
 			return **(this->get());
 		}
 
-		iterator<T>& operator++(int)
+		iterator<T> operator++(int)
 		{
-			(*(this->get()))++;
-			
-			return *this;
+			return (*(this->get()))++;
+		}
+
+		iterator<T> operator++()
+		{
+			return ++(*(this->get()));
+		}
+
+		iterator<T> operator--(int)
+		{
+			return (*(this->get()))--;
+		}
+
+		iterator<T> operator--()
+		{
+			return --(*(this->get()));
 		}
 	};
 }
-

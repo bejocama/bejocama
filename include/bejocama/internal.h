@@ -34,23 +34,40 @@ namespace bejocama
 		template<template<typename...> class C, typename T, typename... TT>
 		struct iterator<C<T,TT...>> : bejocama::base::iterator<T>
 		{
+			using type = iterator<C<T,TT...>>;
+			
 			iterator(const typename C<T,TT...>::iterator& i,
 					 const typename C<T,TT...>::iterator& b,
 					 const typename C<T,TT...>::iterator& e) : _i(i), _b(b), _e(e)
 			{
 			}
 
-			void operator++() override
+			iterator(const iterator& it) : _i(it._i), _b(it._b), _e(it._e)
+			{
+			}
+
+			bejocama::base::iterator<T>* clone() override
+			{
+				return new type(*this);
+			}
+			
+			bejocama::iterator<T> operator++() override
 			{
 				if (*this) ++_i;
+
+				return new type(*this);
 			}
 
-			void operator++(int) override
+			bejocama::iterator<T> operator++(int) override
 			{
-				if (*this) _i++;
+				auto it = new type(*this);
+
+				++(*this);
+
+				return it;
 			}
 
-			void operator--() override
+			bejocama::iterator<T> operator--() override
 			{
 				if (_i != _b) {
 
@@ -60,18 +77,17 @@ namespace bejocama
 
 					_i = _e;
 				}
+
+				return new type(*this);
 			}
 
-			void operator--(int) override
+			bejocama::iterator<T> operator--(int) override
 			{
-				if (_i != _b) {
+				auto it = new type(*this);
+				
+				--(*this);
 
-					_i--;
-					
-				} else {
-
-					_i = _e;
-				}
+				return it;
 			}
 
 			T& operator*() override
@@ -139,21 +155,38 @@ namespace bejocama
 		template<typename T>
 		struct iterator<bejocama::file<T>> : bejocama::base::iterator<T>
 		{
+			using type = iterator<bejocama::file<T>>;
+			
 			iterator(T* i, T* b, T* e) : _i(i), _b(b), _e(e)
 			{
 			}
 
-			void operator++() override
+			iterator(const iterator& it) : _i(it._i), _b(it._b), _e(it._e)
 			{
+			}
+
+			bejocama::base::iterator<T>* clone() override
+			{
+				return new type(*this);
+			}
+			
+			bejocama::iterator<T> operator++() override
+			{				
 				if (*this) ++_i;
+
+				return new type(*this);
 			}
 
-			void operator++(int) override
+			bejocama::iterator<T> operator++(int) override
 			{
-				if (*this) _i++;
+				auto it = new type(*this);
+
+				++(*this);
+				
+				return it;
 			}
 
-			void operator--() override
+			bejocama::iterator<T> operator--() override
 			{
 				if (_i != _b) {
 
@@ -163,18 +196,17 @@ namespace bejocama
 
 					_i = _e;
 				}
+
+				return new iterator(*this);
 			}
 
-			void operator--(int) override
+			bejocama::iterator<T> operator--(int) override
 			{
-				if (_i != _b) {
+				auto it = new type(*this);
+				
+				--(*this);
 
-					_i--;
-					
-				} else {
-
-					_i = _e;
-				}
+				return it;
 			}
 
 			T& operator*() override
