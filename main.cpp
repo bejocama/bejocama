@@ -27,10 +27,17 @@ namespace bejocama
 	template<typename T>
 	void print_file(const char* fn)
 	{
-		composer(fopen,fstat,mmap<T>,make_file<T>(),&file<T>::make_list,print<T>())(io(fn),0,0);
+		using t_make_list = list<T>(file<T>::*)();
+
+		t_make_list method = &file<T>::make_list;
+		
+		composer(fopen,
+				 fstat,mmap<T>,
+				 make_file<T>(),
+				 std::move(method),
+				 print<T>())(io(fn),0,0);
 	}
 	
-
 	template<typename T>
 	void save(const char* fn, T&& t)
 	{

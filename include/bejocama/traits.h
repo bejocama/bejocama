@@ -95,8 +95,8 @@ namespace bejocama
 	{
 	};
 
-	template<typename R, typename C, typename F>
-	struct is_member_of_return_type<R(C::*)() const, F>
+	template<typename R, typename C, typename F, typename... A>
+	struct is_member_of_return_type<R(C::*)(A...) const, F>
 	{		
 		using RT = typename function_traits<F>::rtype;
 
@@ -105,8 +105,8 @@ namespace bejocama
 		static constexpr bool value = std::is_same<C,VT>::value;
 	};
 
-	template<typename R, typename C, typename F>
-	struct is_member_of_return_type<R(C::*)(), F>
+	template<typename R, typename C, typename F, typename... A>
+	struct is_member_of_return_type<R(C::*)(A...), F>
 	{
 		using RT = typename function_traits<F>::rtype;
 
