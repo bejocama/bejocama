@@ -83,18 +83,33 @@ namespace bejocama
 		
 		template<typename>
 		struct factory;
-		
+
 		template<typename T>
 		struct factory<bejocama::base::list<T>>
 		{
 			template<typename U>
-			static bejocama::base::list<T>* create(U&& u)
+				static bejocama::base::list<T>* create_impl(U&& u, tag<bool>)
+			{
+				return u.release();
+			}
+
+			template<typename U>
+			static bejocama::base::list<T>* create_impl(U&& u, tag<char>)
 			{
 				using TT = typename bejocama::clear_type<T>::type;
 				using UU = typename bejocama::clear_type<U>::type;
 
 				return new list<TT,UU>(std::forward<U>(u));
 			}
+
+			template<typename U>
+			static bejocama::base::list<T>* create(U&& u)
+			{
+				using way = typename std::conditional
+					<std::is_same<typename clear_type<U>::type,bejocama::list<T>>::value,bool,char>::type;
+
+				return create_impl(std::forward<U>(u),tag<way>{});
+			}			
 		};
 
 		template<typename T>

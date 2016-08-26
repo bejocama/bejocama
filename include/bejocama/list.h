@@ -34,10 +34,6 @@ namespace bejocama
 		{
 		}
 
-		list(list&& l) : safe_unique_ptr<base::list<T>>(l.release())
-		{
-		}
-		
 		template<typename U>
 			list(U&& u)
 			: safe_unique_ptr<base::list<T>>
