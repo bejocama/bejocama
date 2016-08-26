@@ -37,7 +37,7 @@ namespace bejocama
 		return [&g,h=wrapper<F>(std::forward<F>(f))]
 			(BEFORE&&... before, REPLACE&&... replace, AFTER&&... after) mutable {
 
-			auto val = h.get()(std::forward<REPLACE>(replace)...);
+			auto val = std::move(h.get()(std::forward<REPLACE>(replace)...));
 
 			using VT = typename clear_type<decltype(val)>::type;
 			using XT = typename clear_type<AT>::type;
@@ -49,7 +49,7 @@ namespace bejocama
 										  std::forward<AFTER>(after)...);
 			};
 
-			return combinator<tag<XT,VT>>()(lambda,val);
+			return combinator<tag<XT,VT>>()(std::move(lambda),std::move(val));
 		};
 	}
 
@@ -62,7 +62,7 @@ namespace bejocama
 	{
 		return [&g,h=wrapper<F>(std::forward<F>(f))](OBJECT&&... object, METHOD&&... method) mutable {
 
-			auto val = h.get()(std::forward<OBJECT>(object)...);
+			auto val = std::move(h.get()(std::forward<OBJECT>(object)...));
 
 			using VT = typename clear_type<decltype(val)>::type;
 
@@ -72,7 +72,7 @@ namespace bejocama
 				(std::forward<METHOD>(method)...);
 			};
 			
-			return combinator<tag<VT>>()(lambda,val);
+			return combinator<tag<VT>>()(std::move(lambda),std::move(val));
 		};
 	}
 	

@@ -112,6 +112,7 @@ namespace bejocama
 			list(A&&... a) : _p(new P(std::forward<A>(a)...)),
 							 bejocama::base::list<T>()
 			{
+				static_assert(!std::is_same<bejocama::list<T>,P>::value,"bejocama::list may not be a provider");
 			}
 
 			std::size_t size() const override
