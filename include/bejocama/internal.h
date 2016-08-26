@@ -109,47 +109,49 @@ namespace bejocama
 		struct list : bejocama::base::list<T>
 		{
 			template<typename... A>
-			list(A&&... a) : _p(std::forward<A>(a)...),
+			list(A&&... a) : _p(new P(std::forward<A>(a)...)),
 							 bejocama::base::list<T>()
-			{
-			}
-
-			list(P&& p)
-				: _p(std::move(p)), bejocama::base::list<T>()
 			{
 			}
 
 			std::size_t size() const override
 			{
-				return _p.size();
+				return _p->size();
 			}
 
 			bejocama::iterator<T> begin() override
 			{
-				return new iterator<P>(_p.begin(), _p.begin(), _p.end());
+				return new iterator<P>(_p->begin(), _p->begin(), _p->end());
 			}
 
 			bejocama::iterator<T> end() override
 			{
-				return new iterator<P>(_p.end(), _p.end(), _p.end());
+				return new iterator<P>(_p->end(), _p->end(), _p->end());
 			}
 
 			bejocama::iterator<T> at(std::size_t pos) override
 			{
-				auto it = _p.begin();
+				auto it = _p->begin();
 				
 				std::size_t p = 0;
 
-				while ((it != _p.end()) && (p < pos)) {
+				while ((it != _p->end()) && (p < pos)) {
 
 					++p;
 					++it;
 				}
 
-				return new iterator<P>(it,_p.begin(), _p.end());
+				return new iterator<P>(it,_p->begin(), _p->end());
 			}
 
-			P _p;
+			bejocama::list<T> append(T&& t) override
+			{
+				_p->push_back(std::move(t));
+
+				return std::move(*_p.release());
+			}
+			
+			safe_unique_ptr<P> _p;
 		};
 
 		template<typename T>
@@ -228,7 +230,7 @@ namespace bejocama
 		struct list<T,bejocama::file<T>> : bejocama::base::list<T>
 		{
 			template<typename... A>
-			list(A&&... a) : _p(std::forward<A>(a)...), bejocama::base::list<T>()
+				list(A&&... a) : _p(std::forward<A>(a)...), bejocama::base::list<T>()
 			{
 			}
 
@@ -261,6 +263,15 @@ namespace bejocama
 				return end();
 			}
 
+			bejocama::list<T> append(T&& t) override
+			{
+				auto f = _p->append(std::move(t));
+
+				if (!f) return bejocama::list<T>();
+
+				return std::move(*f);
+			}
+			
 			bejocama::file<T> _p;
 		};
 		
@@ -269,28 +280,28 @@ namespace bejocama
 		{
 			using value_type = T;
 
-			file(const bejocama::io& i) : _io(i) {}
+			file(const bejocama::io& i) : _io(new bejocama::io(i)) {}
 
 			~file()
 			{
-				bejocama::fclose(std::move(_io));
+				if (_io) bejocama::fclose(std::move(*_io.release()));
 			}
 
 			const char* get_mode() const;
 
 			const std::size_t size() const override
 			{
-				return _io._stat.st_size;
+				return _io->_stat.st_size;
 			}
 
 			T* begin() const override
 			{
-				return reinterpret_cast<T*>(_io._map.start + _io._map.poff);
+				return reinterpret_cast<T*>(_io->_map.start + _io->_map.poff);
 			}
 
 			T* end() const override
 			{
-				return reinterpret_cast<T*>(_io._map.start + _io._map.poff + _io._map.len);
+				return reinterpret_cast<T*>(_io->_map.start + _io->_map.poff + _io->_map.len);
 			}
 
 			maybe<bejocama::file<T>> append(T&& t) override
@@ -302,11 +313,13 @@ namespace bejocama
 					 ftruncate<T>,
 					 fstat,mmap<T>,
 					 fcopy<T>,
+					 munmap,
+					 mmap<T>,
 					 make_file<T>())
-					(std::move(_io),1,-1,1,std::forward<T>(t));
+					(std::move(*_io.release()),1,-1,1,std::forward<T>(t),0,0);
 			}
 			
-			bejocama::io _io;
+			safe_unique_ptr<bejocama::io> _io;
 		};
 	}
 }

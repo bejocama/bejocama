@@ -57,5 +57,10 @@ namespace bejocama
 		{
 			return *this;
 		}
+
+		list<T> operator+(T&& t)
+		{
+			return (*this)->append(std::move(t));
+		}
 	};
 }

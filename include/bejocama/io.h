@@ -171,18 +171,25 @@ namespace bejocama
 		
 		return maybe<io>(i);
 	}
-	
-	maybe<io> fclose(io&& i)
+
+	maybe<io> munmap(io&& i)
 	{
 		if (i._fd == -1) return maybe<io>();
 
 		if (i._map.start != nullptr) {
 		
-			munmap(i._map.start,i._map.poff + i._map.len);
+			::munmap(i._map.start,i._map.poff + i._map.len);
 		}
-		
-		::close(i._fd);
-		
+
 		return maybe<io>(i);
+	}
+	
+	maybe<io> fclose(io&& i)
+	{
+		auto m = munmap(std::move(i));
+
+		if (m) ::close(i._fd);
+		
+		return std::move(m);
 	}
 }

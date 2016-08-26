@@ -54,6 +54,7 @@ namespace bejocama
 			virtual bejocama::iterator<T> begin() = 0;
 			virtual bejocama::iterator<T> end() = 0;
 			virtual bejocama::iterator<T> at(std::size_t) = 0;
+			virtual bejocama::list<T> append(T&& t) = 0;
 		};
 
 		template<typename T>

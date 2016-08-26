@@ -166,12 +166,8 @@ namespace bejocama
 	{
 		return [ff=wrapper<F>(std::forward<F>(f))](auto&& a) {
 
-			auto g = [b=wrapper<decltype(a)>(std::forward<decltype(a)>(a))] () {
-
-				return b;
-			};
-
-			return compose<0>(ff,g);
+			return [&ff,&a](auto&&... b) { return ff.get()(std::forward<decltype(a)>(a),
+														   std::forward<decltype(b)>(b)...); };
 		};
 	}
 }

@@ -49,12 +49,7 @@ namespace bejocama
 		{
 			auto it = t->begin();
 
-			while(it) {
-
-				f(*it);
-
-				it++;
-			}
+			while(it) f(*it++);
 
 			return true;
 		}
