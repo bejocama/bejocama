@@ -11,5 +11,7 @@ struct client
 std::ostream& operator<<(std::ostream& os, const client& c)
 {
 	os << "name: " << c.name << std::endl;
+
+	return os;
 }
 

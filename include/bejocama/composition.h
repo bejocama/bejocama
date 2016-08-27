@@ -34,19 +34,19 @@ namespace bejocama
 	decltype(auto) compose_typed(G&& g, F&& f, tag<typelist<REPLACE...>,
 								 typelist<BEFORE...>, typelist<AT>, typelist<AFTER...>>)
 	{
-		return [&g,h=wrapper<F>(std::forward<F>(f))]
+		return [&,gg=wrapper<G>(std::forward<G>(g)),ff=wrapper<F>(std::forward<F>(f))]
 			(BEFORE&&... before, REPLACE&&... replace, AFTER&&... after) mutable {
 
-			auto val = std::move(h.get()(std::forward<REPLACE>(replace)...));
+			auto val = std::move(ff.get()(std::forward<REPLACE>(replace)...));
 
 			using VT = typename clear_type<decltype(val)>::type;
 			using XT = typename clear_type<AT>::type;
 
-			auto lambda = [&g,&before...,&after...](AT&& at) mutable {
+			auto lambda = [&gg,&before...,&after...](auto&& at) mutable {
 
-				return std::forward<G>(g)(std::forward<BEFORE>(before)...,
-										  std::forward<AT>(at),
-										  std::forward<AFTER>(after)...);
+				return gg.get()(std::forward<BEFORE>(before)...,
+								std::forward<decltype(at)>(at),
+								std::forward<AFTER>(after)...);
 			};
 
 			return combinator<tag<XT,VT>>()(std::move(lambda),std::move(val));
@@ -123,9 +123,12 @@ namespace bejocama
 		return compose_at<tag<way>,P>()(std::forward<G>(g), std::forward<F>(f));
 	}
 
-	template<typename... F>
-	decltype(auto) composer(F&&... f);
-
+	template<typename T>
+	decltype(auto) identity(const T& t)
+	{
+		return [t](){ return t; };
+	}
+	
 	namespace utility
 	{
 		template<typename T>
@@ -135,10 +138,12 @@ namespace bejocama
 		struct composer<tag<char>>
 		{
 			template<typename F, typename G, typename... H>
-				decltype(auto) operator()(F&& f, G&& g, H&&... h)
+			static constexpr decltype(auto) action(F&& f, G&& g, H&&... h)
 			{
-				return bejocama::composer
-					(compose<0>(std::forward<G>(g), std::forward<F>(f)),std::forward<H>(h)...);
+				using way = typename std::conditional<(sizeof...(H) > 1), char, bool>::type;
+				
+				return composer<tag<way>>::action
+					(bejocama::compose<0>(std::forward<G>(g), std::forward<F>(f)),std::forward<H>(h)...);
 			}
 		};
 
@@ -146,9 +151,37 @@ namespace bejocama
 		struct composer<tag<bool>>
 		{
 			template<typename F, typename G>
-				decltype(auto) operator()(F&& f, G&& g)
+			static constexpr decltype(auto) action(F&& f, G&& g)
 			{
 				return bejocama::compose<0>(std::forward<G>(g), std::forward<F>(f));
+			}
+		};
+
+		template<typename,std::size_t...>
+		struct curry;
+
+		template<std::size_t P, std::size_t... PP>
+		struct curry<tag<char>,P,PP...>
+		{
+			template<typename F, typename G, typename... GG>
+			static constexpr decltype(auto) action(F&& f, G g, GG... gg)
+			{
+				using way = typename std::conditional<(sizeof...(GG) > 1), char, bool>::type;
+				
+				return curry<tag<way>,PP...>::action(compose<P>(std::forward<F>(f),
+																std::forward<G>(g)),
+													 std::forward<GG>(gg)...);
+			}
+		};
+		
+		template<std::size_t P>
+		struct curry<tag<bool>,P>
+		{
+			template<typename F, typename G>
+			static constexpr decltype(auto) action(F&& f, G&& g)
+			{
+				return compose<P>(std::forward<F>(f),
+								  std::forward<G>(g));
 			}
 		};
 	}
@@ -158,16 +191,15 @@ namespace bejocama
 	{
 		using way = typename std::conditional<(sizeof...(F) > 2), char, bool>::type;
 
-		return utility::composer<tag<way>>()(std::forward<F>(f)...);
+		return utility::composer<tag<way>>::action(std::forward<F>(f)...);
 	}
 
-	template<typename F>
-	decltype(auto) curry(F&& f)
+	template<std::size_t... P, typename F, typename... G>
+	decltype(auto) curry(F&& f, G&&... g)
 	{
-		return [ff=wrapper<F>(std::forward<F>(f))](auto&& a) {
-
-			return [&ff,&a](auto&&... b) { return ff.get()(std::forward<decltype(a)>(a),
-														   std::forward<decltype(b)>(b)...); };
-		};
+		using way = typename std::conditional<(sizeof...(G) > 1), char, bool>::type;
+		
+		return utility::curry<tag<way>,P...>::action(std::forward<F>(f),
+													 std::forward<G>(g)...);
 	}
 }

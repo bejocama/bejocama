@@ -41,6 +41,16 @@ namespace bejocama
 		}
 	};
 
+	template<typename A>
+	struct combinator<tag<A,A>>
+	{
+		template<typename F, typename T>
+		decltype(auto) operator()(F&& f, T&& t)
+		{
+			return std::forward<F>(f)(std::move(std::forward<T>(t)));
+		}
+	};
+	
 	template<typename D>
 	struct combinator<tag<D,list<D>>>
 	{

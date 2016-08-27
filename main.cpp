@@ -33,13 +33,19 @@ namespace bejocama
 
 		t_list m_list = &file<T>::make_list;
 		t_plus m_plus = &list<T>::operator+;
-		
-		composer(fopen,
-				 fstat,mmap<T>,
+
+		auto xopen = curry<0>(fopen,identity(io(fn)));
+
+		auto xmap = curry<1,1>(mmap<T>,
+							   identity((long int)0),
+							   identity((unsigned long int)0));
+		composer(xopen,
+				 fstat,
+				 xmap,
 				 make_file<T>(),
 				 m_list,
 				 m_plus,
-				 print<T>())(io(fn),0,0,std::move(t));
+				 print<T>())(std::move(t));
 	}	
 }
 
