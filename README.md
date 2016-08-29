@@ -1,6 +1,29 @@
 BEJOCAMA - A C++ functional extension library
 =============================================
 
+For the Impatient Reader
+------------------------
+
+The main goal of this activity is to provide a *tool*, that helps to
+obtain a linear coding style. The linearity is often broken by
+
+ * if statements
+ * loops
+ * parallelism
+
+Even if that *tool* has a functional character, the idea is not to make
+C++ to be a functional language.
+
+Status
+------
+
+ * a compose function that composes at any argument position
+ * a variadic composer which composes at position 0
+ * a curry functions that is variadic over positions
+
+ Because this approach is composition oriented, restrictions are
+ not on the threoretical side - if any - not approved yet.
+
 Preface
 -------
 
@@ -213,7 +236,7 @@ decltype(auto) calculate(const F...& f, T... t)
 	throw runtime_error("an error occurred");
 }
 ```
-The *composer* allows the comosition of a variable list of fundtions.
+The *composer* allows the composition of a variadic list of functions.
 
 
 References
