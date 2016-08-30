@@ -1,18 +1,25 @@
 BEJOCAMA - A C++ functional extension library
 =============================================
 
-For the Impatient Reader
+For the impatient Reader
 ------------------------
 
 The main goal of this activity is to provide a *tool*, that helps to
-obtain a linear coding style. The linearity is often broken by
+obtain a linear coding style. The linearity of the code is often
+broken by
 
  * if statements
  * loops
  * parallelism
 
-Even if that *tool* has a functional character, the idea is not to make
-C++ to be a functional language.
+The analysis of this starting motivation leads to code sequencing
+problem. A deeper look inside this problem offers an additional
+possibility of information hiding.
+
+That the whole story ends up in functional considerations comes from
+the close connection between the terms "code sequencing" and
+"function composition".
+
 
 Status
 ------
@@ -20,9 +27,10 @@ Status
  * a compose function that composes at any argument position
  * a variadic composer which composes at position 0
  * a curry functions that is variadic over positions
+ * basic examples of a new typesystem
 
- Because this approach is composition oriented, restrictions are
- not on the threoretical side - if any - not approved yet.
+Because this approach is composition oriented, restrictions are
+not expected from the threoretical side - if any - not approved yet.
 
 Preface
 -------
