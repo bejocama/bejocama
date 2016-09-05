@@ -64,7 +64,7 @@ namespace bejocama
 
 				auto it = a->begin();
 
-				while(it) { f(*it); ++it; }
+				while(it) f(*it++);
 
 				return true;
 			};
