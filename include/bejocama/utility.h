@@ -19,6 +19,7 @@
 
 #pragma once
 #include <memory>
+#include <future>
 
 namespace bejocama
 {
@@ -52,43 +53,12 @@ namespace bejocama
 		using type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
 	};
 
-	//
-	// wrapper for perfect forwading into catures - found at
-	// <http://nvwa.cvs.sourceforge.net/viewvc/nvwa/nvwa/functional.h?view=markup>
-	//
-	template <typename _Tp,
-			  bool _Deep_copy = std::is_rvalue_reference<_Tp>::value ||
-			  (std::is_lvalue_reference<_Tp>::value &&
-			   std::is_const<std::remove_reference_t<_Tp>>::value)>
-		struct wrapper
-		{
-			wrapper(_Tp&& x) : value(std::forward<_Tp>(x)) {}
-	
-			_Tp& get() const { return value; }
-
-			_Tp& get() { return value; }
-	
-			_Tp value;
-		};
-
-	template <typename _Tp>
-	struct wrapper<_Tp, true>
+	template<typename F>
+	decltype(auto) make_async(F&& f)
 	{
-		wrapper(_Tp&& x) : value(std::forward<_Tp>(x)) {}
+		return [f(std::move(std::forward<F>(f)))]() mutable {
 
-		template <typename _Up = _Tp>
-		std::enable_if_t<std::is_rvalue_reference<_Up>::value, std::decay_t<_Tp>>
-			get() const
-		{
-			return value;
-		}
-	
-		template <typename _Up = _Tp>
-		std::enable_if_t<!std::is_rvalue_reference<_Up>::value, _Tp>
-		get() const
-		{
-			return value;
-		}
-		std::decay_t<_Tp> value;
-	};	
+			return std::async(std::launch::async, f);
+		};
+	}
 }

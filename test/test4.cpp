@@ -25,22 +25,34 @@
 
 namespace bejocama
 {
-	template<typename T>
-	void print_file_test1(const char* fn)
-	{
-		using t_make_list = list<T>(file<T>::*)();
 
-		t_make_list method = &file<T>::make_list;
-		
-		composer(fopen,
-				 fstat,mmap<T>,
+	template<typename T>
+	void add_and_print_file(const char* fn, T&& t)
+	{
+		using t_list = list<T>(file<T>::*)();
+		using t_plus = list<T>(list<T>::*)(T&& t);
+
+		t_list m_list = &file<T>::make_list;
+		t_plus m_plus = &list<T>::operator+;
+
+		auto xopen = curry<0>(fopen,identity(io(fn)));
+
+		auto xmap = curry<1,1>(mmap<T>,
+							   identity((long int)0),
+							   identity((unsigned long int)0));
+
+		composer(xopen,
+				 fstat,
+				 xmap,
 				 make_file<T>(),
-				 method,
-				 print<T>())(io(fn),0,0);
+				 m_list,
+				 m_plus,
+				 print<T>())(std::move(t));
 	}
 }
 
-void test1()
+void test4()
 {
-	bejocama::print_file_test1<client>("client.data");
+	bejocama::add_and_print_file<client>("client.data",
+										 client{"tom", "orlando", .age=20,.height=178});
 }

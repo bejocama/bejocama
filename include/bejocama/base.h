@@ -36,13 +36,8 @@ namespace bejocama
 			virtual T& operator*() = 0;
 
 			virtual bejocama::iterator<T> operator++() = 0;
-			virtual bejocama::iterator<T> operator++(int) = 0;
-
 			virtual bejocama::iterator<T> operator--() = 0;
-			virtual bejocama::iterator<T> operator--(int) = 0;
-
 			virtual operator bool() const = 0;
-
 			virtual iterator<T>* clone() = 0;
 		};
 		

@@ -58,15 +58,6 @@ namespace bejocama
 				return new type(*this);
 			}
 
-			bejocama::iterator<T> operator++(int) override
-			{
-				auto it = new type(*this);
-
-				++(*this);
-
-				return it;
-			}
-
 			bejocama::iterator<T> operator--() override
 			{
 				if (_i != _b) {
@@ -79,15 +70,6 @@ namespace bejocama
 				}
 
 				return new type(*this);
-			}
-
-			bejocama::iterator<T> operator--(int) override
-			{
-				auto it = new type(*this);
-				
-				--(*this);
-
-				return it;
 			}
 
 			T& operator*() override
@@ -180,15 +162,6 @@ namespace bejocama
 				return new type(*this);
 			}
 
-			bejocama::iterator<T> operator++(int) override
-			{
-				auto it = new type(*this);
-
-				++(*this);
-				
-				return it;
-			}
-
 			bejocama::iterator<T> operator--() override
 			{
 				if (_i != _b) {
@@ -200,16 +173,7 @@ namespace bejocama
 					_i = _e;
 				}
 
-				return new iterator(*this);
-			}
-
-			bejocama::iterator<T> operator--(int) override
-			{
-				auto it = new type(*this);
-				
-				--(*this);
-
-				return it;
+				return new type(*this);
 			}
 
 			T& operator*() override
@@ -268,7 +232,7 @@ namespace bejocama
 			{
 				auto f = _p->append(std::move(t));
 
-				if (!f) return bejocama::list<T>();
+				if (!f) throw std::runtime_error("ERROR: cannot append to list");
 
 				return std::move(*f);
 			}
@@ -308,16 +272,17 @@ namespace bejocama
 			maybe<bejocama::file<T>> append(T&& t) override
 			{
 				return composer
-					(fclose,
+					(curry<0>(fclose,identity(std::move(*_io.release()))),
 					 fopen,
 					 fstat,
-					 ftruncate<T>,
-					 fstat,mmap<T>,
+					 curry<1>(ftruncate<T>,identity((long int)1)),
+					 fstat,
+					 curry<1,1>(mmap<T>,identity((long int)-1),identity((unsigned long int)1)),
 					 fcopy<T>,
 					 munmap,
-					 mmap<T>,
+					 curry<1,1>(mmap<T>,identity((long int)0),identity((unsigned long int)0)),
 					 make_file<T>())
-					(std::move(*_io.release()),1,-1,1,std::forward<T>(t),0,0);
+					(std::forward<T>(t));
 			}
 			
 			safe_unique_ptr<bejocama::io> _io;

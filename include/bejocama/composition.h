@@ -19,11 +19,16 @@
 
 #pragma once
 #include "typelist.h"
-#include "combinator.h"
 #include "traits.h"
 
 namespace bejocama
 {
+	template<typename A, typename B>
+	struct functor;
+	
+	template<typename T>
+	struct combinator;
+	
 	template<size_t P,
 			 typename G,
 			 typename F,
@@ -34,22 +39,23 @@ namespace bejocama
 	decltype(auto) compose_typed(G&& g, F&& f, tag<typelist<REPLACE...>,
 								 typelist<BEFORE...>, typelist<AT>, typelist<AFTER...>>)
 	{
-		return [&,gg=wrapper<G>(std::forward<G>(g)),ff=wrapper<F>(std::forward<F>(f))]
+		return [g(std::move(std::forward<G>(g))),
+				f(std::move(std::forward<F>(f)))]
 			(BEFORE&&... before, REPLACE&&... replace, AFTER&&... after) mutable {
 
-			auto val = std::move(ff.get()(std::forward<REPLACE>(replace)...));
+			auto val = std::move(f(std::forward<REPLACE>(replace)...));
 
 			using VT = typename clear_type<decltype(val)>::type;
 			using XT = typename clear_type<AT>::type;
 
-			auto lambda = [&gg,&before...,&after...](auto&& at) mutable {
+			auto lambda = [&g,&before...,&after...](auto&& at) mutable {
 
-				return gg.get()(std::forward<BEFORE>(before)...,
-								std::forward<decltype(at)>(at),
-								std::forward<AFTER>(after)...);
+				return g(std::forward<BEFORE>(before)...,
+						 std::forward<decltype(at)>(at),
+						 std::forward<AFTER>(after)...);
 			};
 
-			return combinator<tag<XT,VT>>()(std::move(lambda),std::move(val));
+			return functor<XT,VT>().fmap(std::move(lambda))(std::move(val));
 		};
 	}
 
@@ -60,9 +66,9 @@ namespace bejocama
 			 typename... OBJECT>
 	decltype(auto) compose_object_typed(G&& g, F&& f, tag<typelist<METHOD...>,typelist<OBJECT...>>)
 	{
-		return [&g,h=wrapper<F>(std::forward<F>(f))](OBJECT&&... object, METHOD&&... method) mutable {
+		return [&g,f(std::move(std::forward<F>(f)))](OBJECT&&... object, METHOD&&... method) mutable {
 
-			auto val = std::move(h.get()(std::forward<OBJECT>(object)...));
+			auto val = std::move(f(std::forward<OBJECT>(object)...));
 
 			using VT = typename clear_type<decltype(val)>::type;
 
@@ -72,7 +78,7 @@ namespace bejocama
 				(std::forward<METHOD>(method)...);
 			};
 			
-			return combinator<tag<VT>>()(std::move(lambda),std::move(val));
+			return functor<VT,tag<VT>>().fmap(std::move(lambda))(std::move(val));
 		};
 	}
 	
@@ -124,9 +130,9 @@ namespace bejocama
 	}
 
 	template<typename T>
-	decltype(auto) identity(const T& t)
+	decltype(auto) identity(T&& t)
 	{
-		return [t](){ return t; };
+		return [t(std::move(std::forward<T>(t)))](){ return std::move(t); };
 	}
 	
 	namespace utility

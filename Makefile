@@ -28,7 +28,7 @@ VPATH := test
 .PHONY: program test
 
 program: $(TEST_OBJ)
-	g++ -g -std=c++14 -o $@ $(CPP) $(INCLUDE)
+	g++ -g -std=c++14 -o $@ $(CPP) $(INCLUDE) -lpthread
 
 test:
 	./program

@@ -46,19 +46,9 @@ namespace bejocama
 			return **(this->get());
 		}
 
-		iterator<T> operator++(int)
-		{
-			return (*(this->get()))++;
-		}
-
 		iterator<T> operator++()
 		{
 			return ++(*(this->get()));
-		}
-
-		iterator<T> operator--(int)
-		{
-			return (*(this->get()))--;
 		}
 
 		iterator<T> operator--()
