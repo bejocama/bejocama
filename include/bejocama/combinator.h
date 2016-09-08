@@ -31,6 +31,19 @@ namespace bejocama
 		decltype(auto) operator()(F&& f)
 		{
 			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
+				
+				return f(std::move(std::forward<decltype(a)>(a)));
+			};
+		}
+	};
+
+	template<typename A>
+	struct combinator<maybe<A>,maybe<A>>
+	{
+		template<typename F>
+		decltype(auto) operator()(F&& f)
+		{
+			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
 
 				using type = decltype(f(std::move(*std::forward<decltype(a)>(a))));
 					
@@ -40,16 +53,20 @@ namespace bejocama
 			};
 		}
 	};
-
+		
 	template<typename A>
-	struct combinator<A,A>
+	struct combinator<A,maybe<A>>
 	{
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
 			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
-				
-				return f(std::move(std::forward<decltype(a)>(a)));
+
+				using type = decltype(f(std::move(*std::forward<decltype(a)>(a))));
+					
+				if (!a) return type();
+
+				return f(std::move(*std::forward<decltype(a)>(a)));
 			};
 		}
 	};
@@ -58,7 +75,7 @@ namespace bejocama
 	struct combinator<A,list<A>>
 	{
 		template<typename F>
-			decltype(auto) operator()(F&& f)
+		decltype(auto) operator()(F&& f)
 		{
 			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
 
@@ -79,7 +96,7 @@ namespace bejocama
 	struct combinator<A,std::future<list<A>>>
 	{
 		template<typename F>
-			decltype(auto) operator()(F&& f)
+		decltype(auto) operator()(F&& f)
 		{
 			return [&f](auto&& a) mutable {
 
@@ -104,7 +121,7 @@ namespace bejocama
 	struct combinator<A,std::future<maybe<A>>>
 	{
 		template<typename F>
-			decltype(auto) operator()(F&& f)
+		decltype(auto) operator()(F&& f)
 		{
 			return [&f](auto&& a) mutable {
 
@@ -120,10 +137,10 @@ namespace bejocama
 	};
 
 	template<typename A>
-	struct combinator<std::future<A>,tag<std::future<A>>>
+	struct combinator<std::future<A>,std::future<A>>
 	{
 		template<typename F>
-			decltype(auto) operator()(F&& f)
+		decltype(auto) operator()(F&& f)
 		{
 			return [&f](auto&& a) mutable {
 				

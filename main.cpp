@@ -60,8 +60,8 @@ namespace bejocama
 		*/
 		
 		auto xmap = curry<1,1>(mmap<T>,
-							   identity((long int)0),
-							   identity((unsigned long int)0));
+							   identity(0),
+							   identity(0));
 
 		/*
 		  The xopen thread returns a future and the combinator moves 

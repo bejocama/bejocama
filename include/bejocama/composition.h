@@ -75,7 +75,7 @@ namespace bejocama
 				(std::forward<METHOD>(method)...);
 			};
 			
-			return combinator<VT,tag<VT>>()(std::move(lambda))(std::move(val));
+			return combinator<VT,VT>()(std::move(lambda))(std::move(val));
 		};
 	}
 	
