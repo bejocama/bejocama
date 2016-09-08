@@ -64,8 +64,9 @@ namespace bejocama
 							   identity((unsigned long int)0));
 
 		/*
-		  The xopen thread returns a future and fmap moves that future
-		  to a following thread, which executes another composition.
+		  The xopen thread returns a future and the combinator moves 
+          that future to a following thread, which executes another 
+          composition.
 		*/
 		
 		auto result_assoc = composer(xopen,

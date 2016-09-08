@@ -28,7 +28,7 @@ namespace bejocama
 	struct combinator
 	{
 		template<typename F>
-		decltype(auto) fmap(F&& f)
+		decltype(auto) operator()(F&& f)
 		{
 			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
 
@@ -45,7 +45,7 @@ namespace bejocama
 	struct combinator<A,A>
 	{
 		template<typename F>
-		decltype(auto) fmap(F&& f)
+		decltype(auto) operator()(F&& f)
 		{
 			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
 				
@@ -58,7 +58,7 @@ namespace bejocama
 	struct combinator<A,list<A>>
 	{
 		template<typename F>
-		decltype(auto) fmap(F&& f)
+			decltype(auto) operator()(F&& f)
 		{
 			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
 
@@ -79,7 +79,7 @@ namespace bejocama
 	struct combinator<A,std::future<list<A>>>
 	{
 		template<typename F>
-		decltype(auto) fmap(F&& f)
+			decltype(auto) operator()(F&& f)
 		{
 			return [&f](auto&& a) mutable {
 
@@ -104,7 +104,7 @@ namespace bejocama
 	struct combinator<A,std::future<maybe<A>>>
 	{
 		template<typename F>
-		decltype(auto) fmap(F&& f)
+			decltype(auto) operator()(F&& f)
 		{
 			return [&f](auto&& a) mutable {
 
@@ -123,7 +123,7 @@ namespace bejocama
 	struct combinator<std::future<A>,tag<std::future<A>>>
 	{
 		template<typename F>
-		decltype(auto) fmap(F&& f)
+			decltype(auto) operator()(F&& f)
 		{
 			return [&f](auto&& a) mutable {
 				

@@ -52,7 +52,7 @@ namespace bejocama
 						 std::forward<AFTER>(after)...);
 			};
 
-			return combinator<XT,VT>().fmap(std::move(lambda))(std::move(val));
+			return combinator<XT,VT>()(std::move(lambda))(std::move(val));
 		};
 	}
 
@@ -75,7 +75,7 @@ namespace bejocama
 				(std::forward<METHOD>(method)...);
 			};
 			
-			return combinator<VT,tag<VT>>().fmap(std::move(lambda))(std::move(val));
+			return combinator<VT,tag<VT>>()(std::move(lambda))(std::move(val));
 		};
 	}
 	
