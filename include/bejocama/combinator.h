@@ -25,7 +25,7 @@
 namespace bejocama
 {
 	template<typename A, typename B>
-	struct functor
+	struct combinator
 	{
 		template<typename F>
 		decltype(auto) fmap(F&& f)
@@ -42,7 +42,7 @@ namespace bejocama
 	};
 
 	template<typename A>
-	struct functor<A,A>
+	struct combinator<A,A>
 	{
 		template<typename F>
 		decltype(auto) fmap(F&& f)
@@ -55,7 +55,7 @@ namespace bejocama
 	};
 	
 	template<typename A>
-	struct functor<A,list<A>>
+	struct combinator<A,list<A>>
 	{
 		template<typename F>
 		decltype(auto) fmap(F&& f)
@@ -76,7 +76,7 @@ namespace bejocama
 	//
 	
 	template<typename A>
-	struct functor<A,std::future<list<A>>>
+	struct combinator<A,std::future<list<A>>>
 	{
 		template<typename F>
 		decltype(auto) fmap(F&& f)
@@ -101,7 +101,7 @@ namespace bejocama
 	};
 
 	template<typename A>
-	struct functor<A,std::future<maybe<A>>>
+	struct combinator<A,std::future<maybe<A>>>
 	{
 		template<typename F>
 		decltype(auto) fmap(F&& f)
@@ -120,7 +120,7 @@ namespace bejocama
 	};
 
 	template<typename A>
-	struct functor<std::future<A>,tag<std::future<A>>>
+	struct combinator<std::future<A>,tag<std::future<A>>>
 	{
 		template<typename F>
 		decltype(auto) fmap(F&& f)

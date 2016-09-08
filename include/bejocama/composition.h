@@ -24,9 +24,6 @@
 namespace bejocama
 {
 	template<typename A, typename B>
-	struct functor;
-	
-	template<typename T>
 	struct combinator;
 	
 	template<size_t P,
@@ -55,7 +52,7 @@ namespace bejocama
 						 std::forward<AFTER>(after)...);
 			};
 
-			return functor<XT,VT>().fmap(std::move(lambda))(std::move(val));
+			return combinator<XT,VT>().fmap(std::move(lambda))(std::move(val));
 		};
 	}
 
@@ -78,7 +75,7 @@ namespace bejocama
 				(std::forward<METHOD>(method)...);
 			};
 			
-			return functor<VT,tag<VT>>().fmap(std::move(lambda))(std::move(val));
+			return combinator<VT,tag<VT>>().fmap(std::move(lambda))(std::move(val));
 		};
 	}
 	

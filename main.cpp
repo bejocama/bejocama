@@ -18,7 +18,7 @@
 */
 
 #include "bejocama/composition.h"
-#include "bejocama/functor.h"
+#include "bejocama/combinator.h"
 #include "bejocama/internal.h"
 #include "bejocama/file.h"
 #include "client.h"
