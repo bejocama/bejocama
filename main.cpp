@@ -32,18 +32,16 @@ namespace bejocama
 		/*
 		  In situations where an identifier of a method isn't
 		  unique, the specific type of the method is needed.
-		*/
-		
-		using t_list = list<T>(file<T>::*)();
-		using t_plus = list<T>(list<T>::*)(T&& t);
 
-		/*
 		  Together with the method type, the address operator
 		  provides the right address of the method.
 		*/
 		
-		t_list m_list = &file<T>::make_list;
-		t_plus m_plus = &list<T>::operator+;
+		auto m_list = static_cast<list<T>(file<T>::*)()>
+			(&file<T>::make_list);
+		
+		auto m_plus = static_cast<list<T>(list<T>::*)(T&& t)>
+			(&list<T>::operator+);
 
 		/*
 		  make_async provides a function that starts a thread.
