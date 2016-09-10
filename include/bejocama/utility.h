@@ -71,7 +71,7 @@ namespace bejocama
 	template<typename P, typename T, typename... A>
 	decltype(auto) make_function(T&& t, A&&... a)
 	{
-		return [t(std::move(t))](auto&&... aa) {
+		return [t(std::move(std::forward<T>(t)))](auto&&... aa) {
 
 			auto p = static_cast<P>(&T::operator());
 			
