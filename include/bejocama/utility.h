@@ -67,4 +67,15 @@ namespace bejocama
 	{
 		return [t(std::move(std::forward<T>(t)))](){ return std::move(t); };
 	}
+
+	template<typename T, typename P, typename... A>
+	decltype(auto) make_function(A&&... a)
+	{
+		return [t=T(std::forward<A>(a)...)](auto&&... aa) {
+
+			auto p = static_cast<P>(&T::operator());
+			
+			return (t.*p)(std::forward<decltype(aa)>(aa)...);
+		};
+	}
 }
