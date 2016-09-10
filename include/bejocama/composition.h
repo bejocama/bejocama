@@ -126,12 +126,6 @@ namespace bejocama
 		return compose_at<tag<way>,P>()(std::forward<G>(g), std::forward<F>(f));
 	}
 
-	template<typename T>
-	decltype(auto) identity(T&& t)
-	{
-		return [t(std::move(std::forward<T>(t)))](){ return std::move(t); };
-	}
-	
 	namespace utility
 	{
 		template<typename T>

@@ -308,15 +308,15 @@ namespace bejocama
 			maybe<bejocama::file<T>> append(T&& t) override
 			{
 				return composer
-					(curry<0>(fclose,identity(std::move(*_io.release()))),
+					(curry<0>(fclose,make_value(std::move(*_io.release()))),
 					 fopen,
 					 fstat,
-					 curry<1>(ftruncate<T>,identity((long int)1)),
+					 curry<1>(ftruncate<T>,make_value(1)),
 					 fstat,
-					 curry<1,1>(mmap<T>,identity((long int)-1),identity((unsigned long int)1)),
+					 curry<1,1>(mmap<T>,make_value(-1),make_value(1)),
 					 fcopy<T>,
 					 munmap,
-					 curry<1,1>(mmap<T>,identity((long int)0),identity((unsigned long int)0)),
+					 curry<1,1>(mmap<T>,make_value(0),make_value(0)),
 					 make_file<T>())
 					(std::forward<T>(t));
 			}

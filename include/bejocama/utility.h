@@ -61,4 +61,10 @@ namespace bejocama
 			return std::async(std::launch::async, f);
 		};
 	}
+
+	template<typename T>
+	decltype(auto) make_value(T&& t)
+	{
+		return [t(std::move(std::forward<T>(t)))](){ return std::move(t); };
+	}
 }

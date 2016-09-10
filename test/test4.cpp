@@ -35,11 +35,11 @@ namespace bejocama
 		t_list m_list = &file<T>::make_list;
 		t_plus m_plus = &list<T>::operator+;
 
-		auto xopen = curry<0>(fopen,identity(io(fn)));
+		auto xopen = curry<0>(fopen,make_value(io(fn)));
 
 		auto xmap = curry<1,1>(mmap<T>,
-							   identity((long int)0),
-							   identity((unsigned long int)0));
+							   make_value((long int)0),
+							   make_value((unsigned long int)0));
 
 		composer(xopen,
 				 fstat,
