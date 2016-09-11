@@ -19,6 +19,7 @@
 
 #include "bejocama/composition.h"
 #include "bejocama/combinator.h"
+#include "bejocama/functional.h"
 #include "bejocama/internal.h"
 #include "bejocama/file.h"
 #include "client.h"
@@ -28,13 +29,17 @@ namespace bejocama
 	template<typename T>
 	void print_file_test1(const char* fn)
 	{
-		using t_make_list = list<T>(file<T>::*)();
-
-		t_make_list method = &file<T>::make_list;
+		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
 		
+		auto mkf = make_function<otype>(make_file<T>());
+
+		auto method = static_cast<list<T>(file<T>::*)()>
+			(&file<T>::make_list);
+
 		composer(fopen,
-				 fstat,mmap<T>,
-				 make_file<T>(),
+				 fstat,
+				 mmap<T>,
+				 mkf,
 				 method,
 				 print<T>())(io(fn),0,0);
 	}

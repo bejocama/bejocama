@@ -20,6 +20,7 @@
 #pragma once
 #include <utility>
 #include <cstring>
+#include "bejocama/functional.h"
 #include "bejocama/base.h"
 #include "bejocama/iterator.h"
 #include "bejocama/io.h"
@@ -307,6 +308,10 @@ namespace bejocama
 
 			maybe<bejocama::file<T>> append(T&& t) override
 			{
+				using otype = maybe<bejocama::file<T>>(make_file<T>::*)(io&&);
+				
+				auto mkf = make_function<otype>(make_file<T>());
+
 				return composer
 					(curry<0>(fclose,make_value(std::move(*_io.release()))),
 					 fopen,
@@ -317,7 +322,7 @@ namespace bejocama
 					 fcopy<T>,
 					 munmap,
 					 curry<1,1>(mmap<T>,make_value(0),make_value(0)),
-					 make_file<T>())
+					 mkf)
 					(std::forward<T>(t));
 			}
 			

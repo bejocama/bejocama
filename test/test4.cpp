@@ -19,6 +19,7 @@
 
 #include "bejocama/composition.h"
 #include "bejocama/combinator.h"
+#include "bejocama/functional.h"
 #include "bejocama/internal.h"
 #include "bejocama/file.h"
 #include "client.h"
@@ -41,10 +42,15 @@ namespace bejocama
 							   make_value((long int)0),
 							   make_value((unsigned long int)0));
 
+		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
+		
+		auto mkf = make_function<otype>(make_file<T>());
+
+
 		composer(xopen,
 				 fstat,
 				 xmap,
-				 make_file<T>(),
+				 mkf,
 				 m_list,
 				 m_plus,
 				 print<T>())(std::move(t));

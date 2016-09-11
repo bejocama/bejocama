@@ -67,6 +67,7 @@ namespace bejocama
 	template<typename R, typename C, typename... A>
 	struct function_traits<R(C::*)(A...)>
 	{
+		using ctype = C;
 		using rtype = R;
 		using atype = typelist<A...>;
 	
@@ -77,6 +78,7 @@ namespace bejocama
 	template<typename R, typename C, typename... A>
 	struct function_traits<R(C::*)(A...) const>
 	{
+		using ctype = C;
 		using rtype = R;
 		using atype = typelist<A...>;
 	

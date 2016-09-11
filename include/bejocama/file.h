@@ -50,9 +50,20 @@ namespace bejocama
 	template<typename T>
 	struct make_file
 	{
-		decltype(auto) operator()(io&& i)
+		maybe<file<T>> operator()(io&& i)
 		{
 			return maybe<file<T>>(i);
+		}
+
+		maybe<file<T>> operator()(const string& fn)
+		{
+			auto xopen = curry<0>(fopen,make_value(io(fn)));
+
+			auto xmap = curry<1,1>(mmap<T>,
+								   make_value(0),
+								   make_value(0));
+
+			return composer(xopen,fstat,xmap);
 		}
 	};
 }

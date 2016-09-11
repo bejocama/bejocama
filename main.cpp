@@ -19,6 +19,7 @@
 
 #include "bejocama/composition.h"
 #include "bejocama/combinator.h"
+#include "bejocama/functional.h"
 #include "bejocama/internal.h"
 #include "bejocama/file.h"
 #include "client.h"
@@ -29,6 +30,16 @@ namespace bejocama
 	template<typename T>
 	void add_and_print_file(const char* fn, T&& t)
 	{
+		/*
+
+		  using helper in the case of overloaded function
+		  operators
+
+		*/
+		
+		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
+		auto mkf = make_function<otype>(make_file<T>());
+
 		/*
 		  In situations where an identifier of a method isn't
 		  unique, the specific type of the method is needed.
@@ -70,7 +81,7 @@ namespace bejocama
 		auto result_assoc = composer(xopen,
 									 composer(fstat,
 											  xmap,
-											  make_file<T>(),
+											  mkf,
 											  m_list,
 											  m_plus,
 											  print<T>()))(std::move(t));
@@ -84,7 +95,7 @@ namespace bejocama
 		auto result_every = composer(xopen,
 									 fstat,
 									 xmap,
-									 make_file<T>(),
+									 mkf,
 									 m_list,
 									 m_plus,
 									 print<T>())(std::move(t));
@@ -105,7 +116,7 @@ namespace bejocama
 		auto result_serial = composer(curry<0>(fopen,make_value(io(fn))),
 									  fstat,
 									  xmap,
-									  make_file<T>(),
+									  mkf,
 									  m_list,
 									  m_plus,
 									  print<T>())(std::move(t));
