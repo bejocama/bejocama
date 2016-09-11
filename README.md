@@ -29,6 +29,7 @@ Status
  * a curry functions that is variadic over positions
  * basic examples of a new typesystem
  * support for continuations
+ * make_function for overloaded function operators
 
 Because this approach is composition oriented, restrictions are
 not expected from the threoretical side - if any - not approved yet.
