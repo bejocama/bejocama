@@ -85,7 +85,7 @@ namespace bejocama
 		struct factory<bejocama::base::list<T>>
 		{
 			template<typename U>
-				static bejocama::base::list<T>* create_impl(U&& u, tag<bool>)
+			static bejocama::base::list<T>* create_impl(U&& u, tag<bool>)
 			{
 				return u.release();
 			}

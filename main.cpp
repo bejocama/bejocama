@@ -84,7 +84,7 @@ namespace bejocama
 											  mkf,
 											  m_list,
 											  m_plus,
-											  print<T>()))(std::move(t));
+											  print<T>()))(std::forward<T>(t));
 
 		/*
 		  Starting with the thread function xopen, all following steps
@@ -98,7 +98,7 @@ namespace bejocama
 									 mkf,
 									 m_list,
 									 m_plus,
-									 print<T>())(std::move(t));
+									 print<T>())(std::forward<T>(t));
 
 
 		/*
@@ -124,6 +124,17 @@ namespace bejocama
 		static_assert(std::is_same<decltype(result_assoc.get()),decltype(result_serial)>::value,
 					  "ERROR: types must be equal");
 	}
+
+	void test()
+	{
+		add_and_print_file<client>("client.data",
+								   client{"tom", "orlando", .age=20,.height=178});
+
+
+		auto l = std::list<client>{client{"tom", "orlando", .age=20,.height=178}};
+
+		curry<1>(add_and_print_file<client>,make_value(list<client>(l)));
+	}
 }
 
 /*
@@ -132,8 +143,7 @@ namespace bejocama
 
 int main(int argc, char** argv)
 {
-	bejocama::add_and_print_file<client>("client.data",
-										 client{"tom", "orlando", .age=20,.height=178});
-
+	bejocama::test();
+	
 	return 0;
 }

@@ -79,9 +79,9 @@ namespace bejocama
 		{
 			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
 
-				auto it = a->begin();
+				auto it = std::forward<decltype(a)>(a)->begin();
 
-				while(it) f(*it++);
+				while(it) f(std::move(*it++));
 
 				return true;
 			};
