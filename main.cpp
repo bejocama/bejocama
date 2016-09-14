@@ -28,7 +28,7 @@ namespace bejocama
 {
 
 	template<typename T>
-	void add_and_print_file(const char* fn, T&& t)
+	void add_and_print_file(const char* fn, T t)
 	{
 		/*
 
@@ -84,7 +84,7 @@ namespace bejocama
 											  mkf,
 											  m_list,
 											  m_plus,
-											  print<T>()))(std::forward<T>(t));
+											  print<T>()))(std::move(t));
 
 		/*
 		  Starting with the thread function xopen, all following steps
@@ -98,7 +98,7 @@ namespace bejocama
 									 mkf,
 									 m_list,
 									 m_plus,
-									 print<T>())(std::forward<T>(t));
+									 print<T>())(std::move(t));
 
 
 		/*

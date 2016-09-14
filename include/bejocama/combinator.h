@@ -81,7 +81,7 @@ namespace bejocama
 
 				auto it = std::forward<decltype(a)>(a)->begin();
 
-				while(it) f(std::move(*it++));
+				while(it) f(*it++);
 
 				return true;
 			};
