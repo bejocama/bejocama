@@ -20,6 +20,7 @@
 #pragma once
 #include <iostream>
 #include <future>
+#include "bejocama/fmap.h"
 #include "bejocama/list.h"
 
 namespace bejocama
@@ -77,14 +78,7 @@ namespace bejocama
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
-			return [f(std::move(std::forward<F>(f)))](auto&& a) mutable {
-
-				auto it = std::forward<decltype(a)>(a)->begin();
-
-				while(it) f(*it++);
-
-				return true;
-			};
+			return fmap<list<A>>()(f);
 		}
 	};
 
@@ -104,12 +98,8 @@ namespace bejocama
 						  a(std::move(std::forward<decltype(a)>(a)))]() mutable {
 
 					auto x = a.get();
-					
-					auto it = x->begin();
 
-					while(it) { f(*it); ++it; }
-
-					return true;
+					return fmap<list<A>>()(f)(x);
 				};
 			
 				return std::async(std::launch::async,std::move(l));

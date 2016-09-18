@@ -28,7 +28,7 @@ namespace bejocama
 {
 
 	template<typename T>
-	void add_and_print_file(const char* fn, T t)
+	void add_and_print_file(const char* fn, T&& t)
 	{
 		/*
 

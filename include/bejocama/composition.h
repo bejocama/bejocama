@@ -45,10 +45,10 @@ namespace bejocama
 			using VT = typename clear_type<decltype(val)>::type;
 			using XT = typename clear_type<AT>::type;
 
-			auto lambda = [&g,&before...,&after...](auto&& at) mutable {
+			auto lambda = [&g,&before...,&after...](AT&& at) mutable {
 
 				return g(std::forward<BEFORE>(before)...,
-						 std::forward<decltype(at)>(at),
+						 std::forward<AT>(at),
 						 std::forward<AFTER>(after)...);
 			};
 

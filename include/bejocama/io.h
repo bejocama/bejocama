@@ -33,11 +33,9 @@ namespace bejocama
 	template<typename T>
 	struct print
 	{
-		maybe<bool> operator()(const T& t)
+		void operator()(const T& t)
 		{
 			std::cout << t << std::endl;
-
-			return true;
 		}
 	};
 
