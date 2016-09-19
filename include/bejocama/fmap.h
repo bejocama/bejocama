@@ -29,13 +29,30 @@ namespace bejocama
 		struct fmap;
 
 		template<typename A, typename R>
-		struct fmap<list<A>,R>
+		struct fmap<list<A>,list<R>>
 		{
 			template<typename F, typename I>
 			decltype(auto) operator()(F&& f, I&& i) {
 
 				auto l = f(std::move(*i++));
 				
+				while(i) {
+
+					l->append(f(std::move(*i++)));
+				}
+				
+				return std::move(l);
+			}
+		};
+		
+		template<typename A, typename R>
+		struct fmap<list<A>,R>
+		{
+			template<typename F, typename I>
+			decltype(auto) operator()(F&& f, I&& i) {
+
+				list<R> l;
+
 				while(i) {
 
 					l->append(f(std::move(*i++)));
