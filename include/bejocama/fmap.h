@@ -34,11 +34,14 @@ namespace bejocama
 			template<typename F, typename I>
 			decltype(auto) operator()(F&& f, I&& i) {
 
-				list<R> r;
+				auto l = f(std::move(*i++));
 				
-				while(i) r->append(f(std::move(*i++)));
+				while(i) {
 
-				return std::move(r);
+					l->append(f(std::move(*i++)));
+				}
+				
+				return std::move(l);
 			}
 		};
 
