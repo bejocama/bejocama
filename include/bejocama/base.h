@@ -51,7 +51,7 @@ namespace bejocama
 			virtual bejocama::iterator<T> begin() = 0;
 			virtual bejocama::iterator<T> end() = 0;
 			virtual bejocama::iterator<T> at(std::size_t) = 0;
-			virtual bejocama::list<T> append(T&& t) = 0;
+			virtual bejocama::list<T> add(T&& t) = 0;
 		};
 
 		template<typename T>
@@ -69,7 +69,7 @@ namespace bejocama
 
 			virtual T* end() const  = 0;
 
-			virtual maybe<bejocama::file<T>> append(T&&) = 0;
+			virtual maybe<bejocama::file<T>> add(T&&) = 0;
 		};
 	}
 

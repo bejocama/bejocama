@@ -146,7 +146,7 @@ namespace bejocama
 				return new iterator<P>(it,_p->begin(), _p->end());
 			}
 
-			bejocama::list<T> append(T&& t) override
+			bejocama::list<T> add(T&& t) override
 			{
 				_p->push_back(std::move(t));
 
@@ -265,11 +265,11 @@ namespace bejocama
 				return end();
 			}
 
-			bejocama::list<T> append(T&& t) override
+			bejocama::list<T> add(T&& t) override
 			{
-				auto f = _p->append(std::move(t));
+				auto f = _p->add(std::move(t));
 
-				if (!f) throw std::runtime_error("ERROR: cannot append to list");
+				if (!f) throw std::runtime_error("ERROR: cannot add to list");
 
 				return std::move(*f);
 			}
@@ -306,7 +306,7 @@ namespace bejocama
 				return reinterpret_cast<T*>(_io->_map.start + _io->_map.poff + _io->_map.len);
 			}
 
-			maybe<bejocama::file<T>> append(T&& t) override
+			maybe<bejocama::file<T>> add(T&& t) override
 			{
 				using otype = maybe<bejocama::file<T>>(make_file<T>::*)(io&&);
 				
