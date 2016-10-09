@@ -286,6 +286,7 @@ namespace bejocama
 
 			~file()
 			{
+				//curry<0>(bejocama::fclose,make_value(_io))();
 				if (_io) bejocama::fclose(std::move(*_io.release()));
 			}
 

@@ -38,8 +38,8 @@ namespace bejocama
 		}
 	};
 
-	template<typename A>
-	struct combinator<maybe<A>,maybe<A>>
+	template<template<typename> class T, typename A>
+	struct combinator<A,T<A>>
 	{
 		template<typename F>
 		decltype(auto) operator()(F&& f)
@@ -54,9 +54,9 @@ namespace bejocama
 			};
 		}
 	};
-		
-	template<typename A>
-	struct combinator<A,maybe<A>>
+
+	template<template<typename> class T, typename A>
+	struct combinator<T<A>,T<A>>
 	{
 		template<typename F>
 		decltype(auto) operator()(F&& f)
@@ -71,7 +71,7 @@ namespace bejocama
 			};
 		}
 	};
-	
+
 	template<typename A>
 	struct combinator<A,list<A>>
 	{

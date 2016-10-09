@@ -133,7 +133,7 @@ namespace bejocama
 
 		auto l = std::list<client>{client{"tom", "orlando", .age=20,.height=178}};
 
-		curry<1>(add_and_print_file<client>,make_value(list<client>(l)));
+		curry<1>(add_and_print_file<client>,make_value(list<client>(l)))("client.data");
 	}
 }
 
