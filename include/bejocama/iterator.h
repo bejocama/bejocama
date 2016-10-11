@@ -20,19 +20,20 @@
 #pragma once
 #include <memory>
 #include "bejocama/base.h"
+#include "bejocama/maybe.h"
 
 namespace bejocama
 {
 	template<typename T>
-	struct iterator : safe_unique_ptr<base::iterator<T>>
+	struct iterator : maybe<base::iterator<T>*>
 	{
 		iterator(const iterator& it)
-			: safe_unique_ptr<base::iterator<T>>(it->clone())
+			: maybe<base::iterator<T>*>(it->clone())
 		{
 		}
 
 		iterator(base::iterator<T>* i)
-			: safe_unique_ptr<base::iterator<T>>(i)
+			: maybe<base::iterator<T>*>(i)
 		{
 		}
 

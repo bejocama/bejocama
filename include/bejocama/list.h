@@ -20,23 +20,23 @@
 #pragma once
 #include <memory>
 #include <list>
-#include "bejocama/utility.h"
 #include "bejocama/base.h"
+#include "bejocama/maybe.h"
 
 namespace bejocama
 {
 	template<typename T>
-	struct list : safe_unique_ptr<base::list<T>>
+	struct list : maybe<base::list<T>*>
 	{
 		list(const list&) = delete;
 
-		list() : safe_unique_ptr<base::list<T>>()
+		list() : maybe<base::list<T>*>()
 		{
 		}
 
 		template<typename U>
 			list(U&& u)
-			: safe_unique_ptr<base::list<T>>
+			: maybe<base::list<T>*>
 			(internal::factory<base::list<T>>::create(std::forward<U>(u)))
 		{
 		}

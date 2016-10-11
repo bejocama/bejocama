@@ -48,6 +48,10 @@ namespace bejocama
 			_l = std::move(l);
 		}
 
+		~maybe()
+		{
+		}
+		
 		operator bool() const
 		{
 			return _l->size() == 1;
@@ -64,5 +68,40 @@ namespace bejocama
 		}
 
 		list<T> _l;
+	};
+
+	template<typename T>
+	struct maybe<T*> : std::unique_ptr<T>
+	{
+		using value_type = T;
+
+		maybe(const maybe&) = delete;
+		
+		maybe() : std::unique_ptr<T>()
+		{
+		}
+
+		maybe(maybe&& m) : std::unique_ptr<T>(std::move(m))
+		{
+		}
+		
+		template<typename U>
+		maybe(U&& u) : std::unique_ptr<T>(u)
+		{
+		}
+
+		~maybe()
+		{
+		}
+
+		T& operator*()
+		{
+			if (!*this) {
+			
+				throw std::runtime_error("MAYBE: access to nothing requested");
+			}
+
+			return *(this->get());
+		}
 	};
 }

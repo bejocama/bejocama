@@ -31,22 +31,6 @@ namespace bejocama
 	{
 	};
 
-	template<typename T, typename... TT>
-	struct safe_unique_ptr : std::unique_ptr<T,TT...>
-	{
-		using std::unique_ptr<T,TT...>::unique_ptr;
-
-		T* operator->() const
-		{
-			if (!this->get()) {
-
-				throw std::runtime_error("Nullpointer error");
-			}
-
-			return this->get();
-		}
-	};
-
 	template<typename T>
 	struct clear_type
 	{

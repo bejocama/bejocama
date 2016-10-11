@@ -19,21 +19,22 @@
 
 #pragma once
 #include "bejocama/io.h"
+#include "bejocama/maybe.h"
 
 namespace bejocama
 {
 
 	template<typename T>
-	struct file : safe_unique_ptr<base::file<T>>
+	struct file : maybe<base::file<T>*>
 	{
 		template<typename U>
 			file(U&& u)
-			: safe_unique_ptr<base::file<T>>
+			: maybe<base::file<T>*>
 			(internal::factory<base::file<T>>::create(std::forward<U>(u)))
 		{
 		}
 
-		file(file&& f) : safe_unique_ptr<base::file<T>>(f.release())
+		file(file&& f) : maybe<base::file<T>*>(f.release())
 		{
 		}
 

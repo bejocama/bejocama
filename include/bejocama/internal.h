@@ -153,7 +153,7 @@ namespace bejocama
 				return std::move(*_p.release());
 			}
 			
-			safe_unique_ptr<P> _p;
+			maybe<P*> _p;
 		};
 
 		template<typename T>
@@ -286,7 +286,7 @@ namespace bejocama
 
 			~file()
 			{
-				//curry<0>(bejocama::fclose,make_value(_io))();
+				//curry<0>(bejocama::fclose,make_value(std::move(_io)))();
 				if (_io) bejocama::fclose(std::move(*_io.release()));
 			}
 
@@ -327,7 +327,7 @@ namespace bejocama
 					(std::forward<T>(t));
 			}
 			
-			safe_unique_ptr<bejocama::io> _io;
+			maybe<bejocama::io*> _io;
 		};
 	}
 }
