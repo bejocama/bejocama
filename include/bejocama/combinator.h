@@ -56,6 +56,16 @@ namespace bejocama
 	};
 
 	template<template<typename> class T, typename A>
+	struct combinator<A,T<A*>>
+	{
+		template<typename F>
+		decltype(auto) operator()(F&& f)
+		{
+			return combinator<A,T<A>>()(std::forward<F>(f));
+		}
+	};
+	
+	template<template<typename> class T, typename A>
 	struct combinator<T<A>,T<A>>
 	{
 		template<typename F>

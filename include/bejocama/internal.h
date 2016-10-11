@@ -286,8 +286,12 @@ namespace bejocama
 
 			~file()
 			{
-				//curry<0>(bejocama::fclose,make_value(std::move(_io)))();
-				if (_io) bejocama::fclose(std::move(*_io.release()));
+				//if - replacement
+				//
+				//if (_io) bejocama::fclose(std::move(*_io.release()));
+				//
+				//
+				curry<0>(bejocama::fclose,make_value(std::move(_io)))();
 			}
 
 			const char* get_mode() const;
