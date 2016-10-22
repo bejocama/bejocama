@@ -18,12 +18,31 @@
 */
 
 #pragma once
-#include <memory>
+
 #include <future>
 
 namespace bejocama
 {
+	template<typename T>
+	bool make_true(T&& t)
+	{
+		return true;
+	}
 
+	template<typename T>
+	bool make_throw_true(T t)
+	{
+		throw t;
+
+		return true;
+	}
+	
+	template<typename T>
+	bool make_false(T&& t)
+	{
+		return false;
+	}
+	
 	enum class enabler {};
 
 	template<typename... T>
