@@ -51,10 +51,10 @@ namespace bejocama
 			{
 				return new type(*this);
 			}
-			
+
 			bejocama::iterator<T> operator++() override
 			{
-				if (*this) ++_i;
+				*this && make_true(++_i);
 
 				return new type(*this);
 			}
@@ -62,22 +62,15 @@ namespace bejocama
 			bejocama::iterator<T> operator++(int) override
 			{
 				auto it = new type(*this);
-				
-				if (*this) ++_i;
+
+				*this && make_true(++_i);
 
 				return it;
 			}
 			
 			bejocama::iterator<T> operator--() override
 			{
-				if (_i != _b) {
-
-					--_i;
-					
-				} else {
-
-					_i = _e;
-				}
+				(_i != _b) && make_true(--_i) || make_true(_i = _e);
 
 				return new type(*this);
 			}
@@ -85,9 +78,9 @@ namespace bejocama
 			bejocama::iterator<T> operator--(int) override
 			{
 				auto it = new type(*this);
-				
-				if (*this) --_i;
 
+				*this && make_true(--_i);
+				
 				return it;
 			}
 			
@@ -131,21 +124,6 @@ namespace bejocama
 				return new iterator<P>(_p->end(), _p->end(), _p->end());
 			}
 
-			bejocama::iterator<T> at(std::size_t pos) override
-			{
-				auto it = _p->begin();
-				
-				std::size_t p = 0;
-
-				while ((it != _p->end()) && (p < pos)) {
-
-					++p;
-					++it;
-				}
-
-				return new iterator<P>(it,_p->begin(), _p->end());
-			}
-
 			bejocama::list<T> add(T&& t) override
 			{
 				_p->push_back(std::move(t));
@@ -176,7 +154,7 @@ namespace bejocama
 			
 			bejocama::iterator<T> operator++() override
 			{				
-				if (*this) ++_i;
+				*this && make_true(++_i);
 
 				return new type(*this);
 			}
@@ -184,22 +162,15 @@ namespace bejocama
 			bejocama::iterator<T> operator++(int) override
 			{
 				auto it = new type(*this);
-				
-				if (*this) ++_i;
+
+				*this && make_true(++_i);
 
 				return it;
 			}
 
 			bejocama::iterator<T> operator--() override
 			{
-				if (_i != _b) {
-
-					--_i;
-					
-				} else {
-
-					_i = _e;
-				}
+				_i != _b && make_true(--_i) || make_true(_i = _e);
 
 				return new type(*this);
 			}
@@ -207,8 +178,8 @@ namespace bejocama
 			bejocama::iterator<T> operator--(int) override
 			{
 				auto it = new type(*this);
-				
-				if (*this) --_i;
+
+				*this && make_true(--_i);
 
 				return it;
 			}
@@ -255,21 +226,11 @@ namespace bejocama
 				return new iterator<bejocama::file<T>>(_p->end(), _p->end(), _p->end());
 			}
 
-			bejocama::iterator<T> at(std::size_t pos) override
-			{
-				if (pos < size()) {
-				
-					return new iterator<bejocama::file<T>>(_p->begin() + pos, _p->begin(), _p->end());
-				}
-
-				return end();
-			}
-
 			bejocama::list<T> add(T&& t) override
 			{
 				auto f = _p->add(std::move(t));
 
-				if (!f) throw std::runtime_error("ERROR: cannot add to list");
+				!f && make_throw_true(std::runtime_error("ERROR: cannot add to list"));
 
 				return std::move(*f);
 			}
@@ -286,11 +247,6 @@ namespace bejocama
 
 			~file()
 			{
-				//if - replacement
-				//
-				//if (_io) bejocama::fclose(std::move(*_io.release()));
-				//
-				//
 				curry<0>(bejocama::fclose,make_value(std::move(_io)))();
 			}
 
