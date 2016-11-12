@@ -24,25 +24,13 @@
 namespace bejocama
 {
 	template<typename T>
-	bool make_true(T&& t)
-	{
-		return true;
-	}
-
-	template<typename T>
 	bool make_throw_true(T t)
 	{
 		throw t;
 
 		return true;
 	}
-	
-	template<typename T>
-	bool make_false(T&& t)
-	{
-		return false;
-	}
-	
+		
 	enum class enabler {};
 
 	template<typename... T>
@@ -69,5 +57,17 @@ namespace bejocama
 	decltype(auto) make_value(T&& t)
 	{
 		return [t(std::move(std::forward<T>(t)))]() mutable { return std::move(t); };
+	}
+
+	template<typename T>
+	bool operator||(const bool& b, T&& t)
+	{
+		return false;
+	}
+
+	template<typename T>
+	bool operator&&(const bool& b, T&& t)
+	{
+		return false;
 	}
 }

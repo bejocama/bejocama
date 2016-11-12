@@ -54,7 +54,7 @@ namespace bejocama
 
 			bejocama::iterator<T> operator++() override
 			{
-				*this && make_true(++_i);
+				*this && ++_i;
 
 				return new type(*this);
 			}
@@ -63,14 +63,14 @@ namespace bejocama
 			{
 				auto it = new type(*this);
 
-				*this && make_true(++_i);
+				*this && ++_i;
 
 				return it;
 			}
 			
 			bejocama::iterator<T> operator--() override
 			{
-				(_i != _b) && make_true(--_i) || make_true(_i = _e);
+				(_i != _b) && --_i || (_i = _e);
 
 				return new type(*this);
 			}
@@ -79,7 +79,7 @@ namespace bejocama
 			{
 				auto it = new type(*this);
 
-				*this && make_true(--_i);
+				*this && --_i;
 				
 				return it;
 			}
@@ -154,7 +154,7 @@ namespace bejocama
 			
 			bejocama::iterator<T> operator++() override
 			{				
-				*this && make_true(++_i);
+				*this && ++_i;
 
 				return new type(*this);
 			}
@@ -163,14 +163,14 @@ namespace bejocama
 			{
 				auto it = new type(*this);
 
-				*this && make_true(++_i);
+				*this && ++_i;
 
 				return it;
 			}
 
 			bejocama::iterator<T> operator--() override
 			{
-				_i != _b && make_true(--_i) || make_true(_i = _e);
+				_i != _b && --_i || (_i = _e);
 
 				return new type(*this);
 			}
@@ -179,7 +179,7 @@ namespace bejocama
 			{
 				auto it = new type(*this);
 
-				*this && make_true(--_i);
+				*this && --_i;
 
 				return it;
 			}
