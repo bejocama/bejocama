@@ -247,7 +247,7 @@ namespace bejocama
 
 			~file()
 			{
-				curry<0>(bejocama::fclose,make_value(std::move(_io)))();
+				curry<0>(bejocama::fclose,returns(std::move(_io)))();
 			}
 
 			const char* get_mode() const;
@@ -274,15 +274,15 @@ namespace bejocama
 				auto mkf = make_function<otype>(make_file<T>());
 
 				return composer
-					(curry<0>(fclose,make_value(std::move(*_io.release()))),
+					(curry<0>(fclose,returns(std::move(*_io.release()))),
 					 fopen,
 					 fstat,
-					 curry<1>(ftruncate<T>,make_value(1)),
+					 curry<1>(ftruncate<T>,returns(1)),
 					 fstat,
-					 curry<1,1>(mmap<T>,make_value(-1),make_value(1)),
+					 curry<1,1>(mmap<T>,returns(-1),returns(1)),
 					 fcopy<T>,
 					 munmap,
-					 curry<1,1>(mmap<T>,make_value(0),make_value(0)),
+					 curry<1,1>(mmap<T>,returns(0),returns(0)),
 					 mkf)
 					(std::forward<T>(t));
 			}

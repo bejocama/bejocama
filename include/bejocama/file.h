@@ -58,11 +58,11 @@ namespace bejocama
 
 		maybe<file<T>> operator()(const string& fn)
 		{
-			auto xopen = curry<0>(fopen,make_value(io(fn)));
+			auto xopen = curry<0>(fopen,returns(io(fn)));
 
 			auto xmap = curry<1,1>(mmap<T>,
-								   make_value(0),
-								   make_value(0));
+								   returns(0),
+								   returns(0));
 
 			return composer(xopen,fstat,xmap);
 		}

@@ -62,15 +62,15 @@ namespace bejocama
 		  as a function -- improvements are planned later.
 		*/
 		
-		auto xopen = make_async(curry<0>(fopen,make_value(io(fn))));
+		auto xopen = make_async(curry<0>(fopen,returns(io(fn))));
 
 		/*
 		  Test of the curry function.
 		*/
 		
 		auto xmap = curry<1,1>(mmap<T>,
-							   make_value(0),
-							   make_value(0));
+							   returns(0),
+							   returns(0));
 
 		/*
 		  The xopen thread returns a future and the combinator moves 
@@ -113,7 +113,7 @@ namespace bejocama
 		  functional transformation.
 		 */
 		
-		auto result_serial = composer(curry<0>(fopen,make_value(io(fn))),
+		auto result_serial = composer(curry<0>(fopen,returns(io(fn))),
 									  fstat,
 									  xmap,
 									  mkf,
@@ -133,7 +133,7 @@ namespace bejocama
 
 		auto l = std::list<client>{client{"tom", "orlando", .age=20,.height=178}};
 
-		curry<1>(add_and_print_file<client>,make_value(list<client>(l)))("client.data");
+		curry<1>(add_and_print_file<client>,returns(list<client>(l)))("client.data");
 	}
 }
 

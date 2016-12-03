@@ -54,7 +54,7 @@ namespace bejocama
 	}
 
 	template<typename T>
-	decltype(auto) make_value(T&& t)
+	decltype(auto) returns(T&& t)
 	{
 		return [t(std::move(std::forward<T>(t)))]() mutable { return std::move(t); };
 	}
