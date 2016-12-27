@@ -32,7 +32,7 @@ Status
  * make_function for overloaded function operators
 
 Because this approach is composition oriented, restrictions are
-not expected from the threoretical side - if any - not approved yet.
+not expected from the theoretical side - if any - not approved yet.
 
 Preface
 -------
