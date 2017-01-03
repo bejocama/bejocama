@@ -28,7 +28,7 @@ namespace bejocama
 {
 
 	template<typename T>
-	void add_and_print_file(const char* fn, T&& t)
+	void add_and_print_file(string fn, T&& t)
 	{
 		using t_list = list<T>(file<T>::*)();
 		using t_plus = list<T>(list<T>::*)(T&& t);
@@ -59,6 +59,6 @@ namespace bejocama
 
 void test4()
 {
-	bejocama::add_and_print_file<client>("client.data",
+	bejocama::add_and_print_file<client>(std::string("client.data"),
 										 client{"tom", "orlando", .age=20,.height=178});
 }

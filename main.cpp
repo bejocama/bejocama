@@ -28,7 +28,7 @@ namespace bejocama
 {
 
 	template<typename T>
-	void add_and_print_file(const char* fn, T&& t)
+	void add_and_print_file(string fn, T&& t)
 	{
 		/*
 
@@ -127,13 +127,13 @@ namespace bejocama
 
 	void test()
 	{
-		add_and_print_file<client>("client.data",
+		add_and_print_file<client>(std::string("client.data"),
 								   client{"tom", "orlando", .age=20,.height=178});
 
 
 		auto l = std::list<client>{client{"tom", "orlando", .age=20,.height=178}};
 
-		curry<1>(add_and_print_file<client>,returns(list<client>(l)))("client.data");
+		curry<1>(add_and_print_file<client>,returns(list<client>(l)))(std::string("client.data"));
 	}
 }
 

@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <memory.h>
 #include "bejocama/maybe.h"
 #include "bejocama/string.h"
 
@@ -66,7 +67,7 @@ namespace bejocama
 			return io(i);
 		}
 		
-		string _fn = "";
+		string _fn;
 		int _fd = -1;
 		struct stat _stat;
 		mapping _map;
@@ -75,7 +76,7 @@ namespace bejocama
 
 	maybe<io> fopen(io&& i)
 	{
-		i._fd = open(i._fn(), i._mode , (mode_t)0600);
+		i._fd = open(i._fn->c_str(), i._mode , (mode_t)0600);
 		
 		if (i._fd == -1) {
 

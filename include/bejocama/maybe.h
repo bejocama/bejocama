@@ -103,5 +103,10 @@ namespace bejocama
 
 			return *(this->get());
 		}
+
+		const T& operator*() const
+		{
+			return const_cast<maybe<T*>*>(this)->operator*();
+		}
 	};
 }

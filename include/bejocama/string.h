@@ -18,79 +18,39 @@
 */
 
 #pragma once
-#include <cstring>
-#include <memory>
-#include <string.h>
 
 namespace bejocama
 {
-	struct string
+	struct string : maybe<base::string*>
 	{
-		using type = char[256];
+		string() : maybe<base::string*>()
+		{
+		}
+
+		template<typename U>
+		string(U&& u)
+			: maybe<base::string*>
+			(internal::factory<base::string>::create(std::forward<U>(u)))
+		{
+		}
+
+		string(const string& s)
+			: maybe<base::string*>
+			(internal::factory<base::string>::create(s))
+		{
+		}
 		
-		static constexpr auto capacity()
+		template<typename U>
+		string& operator=(U&& u)
 		{
-			return sizeof(type) - 1;
-		}
-
-		string(const string& s) : _buffer(new type[1])
-		{
-			auto a = _buffer.get();
-
-			auto b = s._buffer.get();
-			
-			::strncpy(*a, *b, capacity());
-		}
-		
-		string() : _buffer(nullptr)
-		{
-		}
-
-		string& set(type& str)
-		{
-			_buffer.reset(&str);
+			(*this).reset(internal::factory<base::string>::create(std::forward<U>(u)));
 
 			return *this;
 		}
 		
-		string(const char* str)
+		string& operator*()
 		{
-			if (_buffer == nullptr) allocate();
-
-			char* c = (char*)_buffer.get();
-			
-			strncpy(c, str, capacity());
+			return *this;
 		}
-		
-		std::size_t size()
-		{
-			if (_buffer == nullptr) return 0;
-
-			char* c = (char*)_buffer.get();
-			
-			return strlen(c);
-		}
-
-		type& operator()() const
-		{
-			if (_buffer == nullptr) throw;
-
-			return *_buffer.get();
-		}
-
-		
-		type& operator()()
-		{
-			if (_buffer == nullptr) allocate();
-
-			return *_buffer.get();
-		}
-
-		void allocate()
-		{
-			_buffer.reset(new type[1]);
-		}
-		
-		std::unique_ptr<type> _buffer;
 	};
 }

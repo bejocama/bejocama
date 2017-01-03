@@ -27,7 +27,7 @@
 namespace bejocama
 {
 	template<typename T>
-	void print_file_test1(const char* fn)
+	void print_file_test1(string fn)
 	{
 		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
 		
@@ -47,5 +47,5 @@ namespace bejocama
 
 void test1()
 {
-	bejocama::print_file_test1<client>("client.data");
+	bejocama::print_file_test1<client>(std::string("client.data"));
 }
