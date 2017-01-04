@@ -22,11 +22,12 @@
 #include "bejocama/functional.h"
 #include "bejocama/base/file.h"
 #include "bejocama/io.h"
-#include "bejocama/maybe.h"
 #include "bejocama/string.h"
 
 namespace bejocama
 {
+	template<typename> struct maybe;
+	
 	template<typename T>
 	struct make_file
 	{
