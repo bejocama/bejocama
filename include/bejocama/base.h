@@ -34,7 +34,7 @@ namespace bejocama
 		struct string
 		{
 			virtual const char* c_str() const = 0;
-			virtual base::string* copy() const = 0;
+			virtual base::string* clone() const = 0;
 		};
 		
 		template<typename T>
@@ -94,7 +94,7 @@ namespace bejocama
 			template<typename U>
 			static bejocama::base::string* create_impl(const U& u, tag<bool>)
 			{
-				return u->copy();
+				return u->clone();
 			}
 			
 			template<typename U>

@@ -311,7 +311,7 @@ namespace bejocama
 				return _p ? _p->c_str() : "";
 			}
 
-			base::string* copy() const override
+			base::string* clone() const override
 			{
 				return _p ? new string(*_p) : nullptr;
 			}
