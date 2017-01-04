@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "bejocama/provider/file.h"
+#include "bejocama/factory/file.h"
 
 namespace bejocama
 {
@@ -30,7 +30,7 @@ namespace bejocama
 		template<typename U>
 			file(U&& u)
 			: maybe<base::file<T>*>
-			(internal::factory<base::file<T>>::create(std::forward<U>(u)))
+			(provider::factory<base::file<T>>::create(std::forward<U>(u)))
 		{
 		}
 

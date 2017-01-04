@@ -25,7 +25,7 @@ namespace bejocama
 {
 	template<typename> struct file;
 	
-	namespace internal
+	namespace provider
 	{
 		template<typename T> struct iterator;
 		

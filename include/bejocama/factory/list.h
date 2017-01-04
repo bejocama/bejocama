@@ -19,40 +19,41 @@
 
 #pragma once
 
-#include <string>
-#include "bejocama/interface/string.h"
+#include "bejocama/provider/list.h"
 
 namespace bejocama
 {
 	namespace provider
 	{
-		template<typename P>
-		struct string;
+		template<typename>
+		struct factory;
 
-		template<>
-		struct string<std::string> : base::string
+		template<typename T>
+		struct factory<bejocama::base::list<T>>
 		{
-			using type = std::string;
-			
-			string(std::string&& s) : base::string(), _p(new std::string(std::move(s)))
+			template<typename U>
+			static bejocama::base::list<T>* create_impl(U&& u, tag<bool>)
 			{
+				return u.release();
 			}
 
-			string(const std::string& s) : base::string(), _p(new std::string(s))
+			template<typename U>
+			static bejocama::base::list<T>* create_impl(U&& u, tag<char>)
 			{
-			}
-			
-			const char* c_str() const override
-			{
-				return _p ? _p->c_str() : "";
+				using TT = typename bejocama::clear_type<T>::type;
+				using UU = typename bejocama::clear_type<U>::type;
+
+				return new list<TT,UU>(std::forward<U>(u));
 			}
 
-			base::string* clone() const override
+			template<typename U>
+			static bejocama::base::list<T>* create(U&& u)
 			{
-				return _p ? new string(*_p) : nullptr;
-			}
-			
-			maybe<std::string*> _p;
+				using way = typename std::conditional
+					<std::is_same<typename clear_type<U>::type,bejocama::list<T>>::value,bool,char>::type;
+
+				return create_impl(std::forward<U>(u),tag<way>{});
+			}			
 		};
 	}
 }

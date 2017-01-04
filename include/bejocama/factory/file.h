@@ -19,40 +19,25 @@
 
 #pragma once
 
-#include <string>
-#include "bejocama/interface/string.h"
+#include "bejocama/provider/file.h"
 
 namespace bejocama
 {
 	namespace provider
 	{
-		template<typename P>
-		struct string;
+		template<typename>
+		struct factory;
 
-		template<>
-		struct string<std::string> : base::string
+		template<typename T>
+		struct factory<bejocama::base::file<T>>
 		{
-			using type = std::string;
-			
-			string(std::string&& s) : base::string(), _p(new std::string(std::move(s)))
+			template<typename U>
+			static bejocama::base::file<T>* create(U&& u)
 			{
-			}
+				using TT = typename bejocama::clear_type<T>::type;
 
-			string(const std::string& s) : base::string(), _p(new std::string(s))
-			{
+				return new file<TT>(std::forward<U>(u));
 			}
-			
-			const char* c_str() const override
-			{
-				return _p ? _p->c_str() : "";
-			}
-
-			base::string* clone() const override
-			{
-				return _p ? new string(*_p) : nullptr;
-			}
-			
-			maybe<std::string*> _p;
 		};
 	}
 }

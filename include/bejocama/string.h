@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "bejocama/provider/string.h"
+#include "bejocama/factory/string.h"
 
 namespace bejocama
 {
@@ -32,20 +32,20 @@ namespace bejocama
 		template<typename U>
 		string(U&& u)
 			: maybe<base::string*>
-			(internal::factory<base::string>::create(std::forward<U>(u)))
+			(provider::factory<base::string>::create(std::forward<U>(u)))
 		{
 		}
 
 		string(const string& s)
 			: maybe<base::string*>
-			(internal::factory<base::string>::create(s))
+			(provider::factory<base::string>::create(s))
 		{
 		}
 		
 		template<typename U>
 		string& operator=(U&& u)
 		{
-			(*this).reset(internal::factory<base::string>::create(std::forward<U>(u)));
+			(*this).reset(provider::factory<base::string>::create(std::forward<U>(u)));
 
 			return *this;
 		}

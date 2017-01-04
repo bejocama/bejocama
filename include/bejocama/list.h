@@ -19,7 +19,7 @@
 
 #pragma once
 #include <list>
-#include "bejocama/provider/list.h"
+#include "bejocama/factory/list.h"
 #include "bejocama/maybe.h"
 
 namespace bejocama
@@ -36,14 +36,14 @@ namespace bejocama
 		template<typename U>
 			list(U&& u)
 			: maybe<base::list<T>*>
-			(internal::factory<base::list<T>>::create(std::forward<U>(u)))
+			(provider::factory<base::list<T>>::create(std::forward<U>(u)))
 		{
 		}
 
 		template<typename U>
 		list<T>& operator=(U&& u)
 		{
-			(*this).reset(internal::factory<base::list<T>>::create(std::forward<U>(u)));
+			(*this).reset(provider::factory<base::list<T>>::create(std::forward<U>(u)));
 
 			return *this;
 		}
