@@ -289,34 +289,5 @@ namespace bejocama
 			
 			maybe<bejocama::io*> _io;
 		};
-
-		template<typename P>
-		struct string;
-
-		template<>
-		struct string<std::string> : base::string
-		{
-			using type = std::string;
-			
-			string(std::string&& s) : base::string(), _p(new std::string(std::move(s)))
-			{
-			}
-
-			string(const std::string& s) : base::string(), _p(new std::string(s))
-			{
-			}
-			
-			const char* c_str() const override
-			{
-				return _p ? _p->c_str() : "";
-			}
-
-			base::string* clone() const override
-			{
-				return _p ? new string(*_p) : nullptr;
-			}
-			
-			maybe<std::string*> _p;
-		};
 	}
 }

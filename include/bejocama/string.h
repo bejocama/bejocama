@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "bejocama/internal/string.h"
+
 namespace bejocama
 {
 	struct string : maybe<base::string*>

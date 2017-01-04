@@ -25,16 +25,9 @@ namespace bejocama
 	template<typename> struct iterator;
 	template<typename> struct list;
 	template<typename> struct file;
-	struct string;
 	
 	namespace base
 	{
-		struct string
-		{
-			virtual const char* c_str() const = 0;
-			virtual base::string* clone() const = 0;
-		};
-		
 		template<typename T>
 		struct iterator
 		{
@@ -81,44 +74,9 @@ namespace bejocama
 	{
 		template<typename,typename> struct list;
 		template<typename> struct file;
-		template<typename> struct string;
 		
 		template<typename>
 		struct factory;
-
-		template<>
-		struct factory<bejocama::base::string>
-		{
-			template<typename U>
-			static bejocama::base::string* create_impl(const U& u, tag<bool>)
-			{
-				return u->clone();
-			}
-			
-			template<typename U>
-			static bejocama::base::string* create_impl(U&& u, tag<bool>)
-			{
-				return u.release();
-			}
-
-			template<typename U>
-			static bejocama::base::string* create_impl(U&& u, tag<char>)
-			{
-				using UU = typename bejocama::clear_type<U>::type;
-
-				return new string<UU>(std::forward<U>(u));
-			}
-
-			template<typename U>
-			static bejocama::base::string* create(U&& u)
-			{
-				using way = typename std::conditional
-					<std::is_same<typename clear_type<U>::type,
-								  bejocama::string>::value,bool,char>::type;
-
-				return create_impl(std::forward<U>(u),tag<way>{});
-			}			
-		};
 
 		template<typename T>
 		struct factory<bejocama::base::list<T>>
