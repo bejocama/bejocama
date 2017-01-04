@@ -18,8 +18,8 @@
 */
 
 #pragma once
-#include "bejocama/io.h"
-#include "bejocama/maybe.h"
+
+#include "bejocama/internal/file.h"
 
 namespace bejocama
 {
@@ -45,26 +45,6 @@ namespace bejocama
 		list<T> make_list()
 		{
 			return std::move(*this);
-		}
-	};
-
-	template<typename T>
-	struct make_file
-	{
-		maybe<file<T>> operator()(io&& i)
-		{
-			return maybe<file<T>>(i);
-		}
-
-		maybe<file<T>> operator()(const string& fn)
-		{
-			auto xopen = curry<0>(fopen,returns(io(fn)));
-
-			auto xmap = curry<1,1>(mmap<T>,
-								   returns(0),
-								   returns(0));
-
-			return composer(xopen,fstat,xmap);
 		}
 	};
 }

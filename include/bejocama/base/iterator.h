@@ -21,10 +21,7 @@
 
 namespace bejocama
 {
-	template<typename> struct maybe;
 	template<typename> struct iterator;
-	template<typename> struct list;
-	template<typename> struct file;
 	
 	namespace base
 	{
@@ -39,44 +36,6 @@ namespace bejocama
 			virtual bejocama::iterator<T> operator--(int) = 0;
 			virtual operator bool() const = 0;
 			virtual iterator<T>* clone() = 0;
-		};
-		
-		template<typename T>
-		struct file
-		{
-			using value_type = T;
-
-			virtual ~file()
-			{
-			}
-
-			virtual const std::size_t size() const = 0;
-
-			virtual T* begin() const = 0;
-
-			virtual T* end() const  = 0;
-
-			virtual maybe<bejocama::file<T>> add(T&&) = 0;
-		};
-	}
-
-	namespace internal
-	{
-		template<typename> struct file;
-		
-		template<typename>
-		struct factory;
-
-		template<typename T>
-		struct factory<bejocama::base::file<T>>
-		{
-			template<typename U>
-			static bejocama::base::file<T>* create(U&& u)
-			{
-				using TT = typename bejocama::clear_type<T>::type;
-
-				return new file<TT>(std::forward<U>(u));
-			}
-		};
+		};		
 	}
 }

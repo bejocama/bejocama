@@ -18,16 +18,13 @@
 */
 
 #pragma once
-#include <string>
-#include <utility>
-#include "bejocama/functional.h"
-#include "bejocama/base.h"
-#include "bejocama/iterator.h"
-#include "bejocama/io.h"
-#include "bejocama/file.h"
+
+#include "bejocama/base/iterator.h"
 
 namespace bejocama
 {
+	template<typename> struct file;
+	
 	namespace internal
 	{
 		template<typename T> struct iterator;
@@ -162,58 +159,6 @@ namespace bejocama
 			T* _i;
 			T* _b;
 			T* _e;
-		};
-		
-		template<typename T>
-		struct file : bejocama::base::file<T>
-		{
-			using value_type = T;
-
-			file(bejocama::io&& i) : _io(new bejocama::io(std::move(i))) {}
-
-			~file()
-			{
-				curry<0>(bejocama::fclose,returns(std::move(_io)))();
-			}
-
-			const char* get_mode() const;
-
-			const std::size_t size() const override
-			{
-				return _io->_stat.st_size;
-			}
-
-			T* begin() const override
-			{
-				return reinterpret_cast<T*>(_io->_map.start + _io->_map.poff);
-			}
-
-			T* end() const override
-			{
-				return reinterpret_cast<T*>(_io->_map.start + _io->_map.poff + _io->_map.len);
-			}
-
-			maybe<bejocama::file<T>> add(T&& t) override
-			{
-				using otype = maybe<bejocama::file<T>>(make_file<T>::*)(io&&);
-				
-				auto mkf = make_function<otype>(make_file<T>());
-
-				return composer
-					(curry<0>(fclose,returns(std::move(*_io.release()))),
-					 fopen,
-					 fstat,
-					 curry<1>(ftruncate<T>,returns(1)),
-					 fstat,
-					 curry<1,1>(mmap<T>,returns(-1),returns(1)),
-					 fcopy<T>,
-					 munmap,
-					 curry<1,1>(mmap<T>,returns(0),returns(0)),
-					 mkf)
-					(std::forward<T>(t));
-			}
-			
-			maybe<bejocama::io*> _io;
-		};
+		};		
 	}
 }

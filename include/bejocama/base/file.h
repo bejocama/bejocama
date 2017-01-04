@@ -17,12 +17,33 @@
 
 */
 
-#include "bejocama/composition.h"
-#include "bejocama/iterator.h"
-#include "bejocama/file.h"
-#include "client.h"
+#pragma once
 
-void test3()
+namespace bejocama
 {
-	 auto ll = bejocama::list<client>() + client{"tom", "orlando", .age=20,.height=178};
+	template<typename> struct maybe;
+	template<typename> struct iterator;
+	template<typename> struct list;
+	template<typename> struct file;
+	
+	namespace base
+	{
+		template<typename T>
+		struct file
+		{
+			using value_type = T;
+
+			virtual ~file()
+			{
+			}
+
+			virtual const std::size_t size() const = 0;
+
+			virtual T* begin() const = 0;
+
+			virtual T* end() const  = 0;
+
+			virtual maybe<bejocama::file<T>> add(T&&) = 0;
+		};
+	}
 }

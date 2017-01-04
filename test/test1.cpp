@@ -20,8 +20,8 @@
 #include "bejocama/composition.h"
 #include "bejocama/combinator.h"
 #include "bejocama/functional.h"
-#include "bejocama/internal.h"
 #include "bejocama/file.h"
+#include "bejocama/iterator.h"
 #include "client.h"
 
 namespace bejocama

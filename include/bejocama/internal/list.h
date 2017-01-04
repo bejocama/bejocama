@@ -20,11 +20,11 @@
 #pragma once
 
 #include "bejocama/base/list.h"
-#include "bejocama/maybe.h"
 
 namespace bejocama
 {
 	template<typename> struct file;
+	template<typename> struct maybe;
 	
 	namespace internal
 	{
