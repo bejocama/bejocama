@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "bejocama/base/list.h"
+#include "bejocama/interface/list.h"
 
 namespace bejocama
 {

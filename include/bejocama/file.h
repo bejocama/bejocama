@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "bejocama/internal/file.h"
+#include "bejocama/provider/file.h"
 
 namespace bejocama
 {

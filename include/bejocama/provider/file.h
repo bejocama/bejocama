@@ -20,7 +20,7 @@
 #pragma once
 
 #include "bejocama/functional.h"
-#include "bejocama/base/file.h"
+#include "bejocama/interface/file.h"
 #include "bejocama/io.h"
 #include "bejocama/string.h"
 

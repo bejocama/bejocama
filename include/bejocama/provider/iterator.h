@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "bejocama/base/iterator.h"
+#include "bejocama/interface/iterator.h"
 
 namespace bejocama
 {
