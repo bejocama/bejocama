@@ -99,41 +99,6 @@ namespace bejocama
 			typename C<T,TT...>::iterator _e;
 		};
 		
-		template<typename T, typename P>
-		struct list : bejocama::base::list<T>
-		{
-			template<typename... A>
-			list(A&&... a) : _p(new P(std::forward<A>(a)...)),
-							 bejocama::base::list<T>()
-			{
-				static_assert(!std::is_same<bejocama::list<T>,P>::value,"bejocama::list may not be a provider");
-			}
-
-			std::size_t size() const override
-			{
-				return _p->size();
-			}
-
-			bejocama::iterator<T> begin() override
-			{
-				return new iterator<P>(_p->begin(), _p->begin(), _p->end());
-			}
-
-			bejocama::iterator<T> end() override
-			{
-				return new iterator<P>(_p->end(), _p->end(), _p->end());
-			}
-
-			bejocama::list<T> add(T&& t) override
-			{
-				_p->push_back(std::move(t));
-
-				return std::move(*_p.release());
-			}
-			
-			maybe<P*> _p;
-		};
-
 		template<typename T>
 		struct iterator<bejocama::file<T>> : bejocama::base::iterator<T>
 		{
@@ -197,45 +162,6 @@ namespace bejocama
 			T* _i;
 			T* _b;
 			T* _e;
-		};
-		
-		template<typename T>
-		struct list<T,bejocama::file<T>> : bejocama::base::list<T>
-		{
-			template<typename... A>
-				list(A&&... a) : _p(std::forward<A>(a)...), bejocama::base::list<T>()
-			{
-			}
-
-			list(bejocama::file<T>&& p) : _p(std::move(p)), bejocama::base::list<T>()
-			{
-			}
-
-			std::size_t size() const override
-			{
-				return _p->size() / sizeof(T);
-			}
-
-			bejocama::iterator<T> begin() override
-			{
-				return new iterator<bejocama::file<T>>(_p->begin(), _p->begin(), _p->end());
-			}
-
-			bejocama::iterator<T> end() override
-			{
-				return new iterator<bejocama::file<T>>(_p->end(), _p->end(), _p->end());
-			}
-
-			bejocama::list<T> add(T&& t) override
-			{
-				auto f = _p->add(std::move(t));
-
-				!f && make_throw_true(std::runtime_error("ERROR: cannot add to list"));
-
-				return std::move(*f);
-			}
-			
-			bejocama::file<T> _p;
 		};
 		
 		template<typename T>

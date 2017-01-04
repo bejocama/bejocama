@@ -18,44 +18,22 @@
 */
 
 #pragma once
-#include <list>
-#include "bejocama/internal/list.h"
-#include "bejocama/maybe.h"
 
 namespace bejocama
 {
-	template<typename T>
-	struct list : maybe<base::list<T>*>
+	template<typename> struct iterator;
+	template<typename> struct list;
+	
+	namespace base
 	{
-		list(const list&) = delete;
-
-		list() : maybe<base::list<T>*>()
+		template<typename T>
+		struct list
 		{
-		}
-
-		template<typename U>
-			list(U&& u)
-			: maybe<base::list<T>*>
-			(internal::factory<base::list<T>>::create(std::forward<U>(u)))
-		{
-		}
-
-		template<typename U>
-		list<T>& operator=(U&& u)
-		{
-			(*this).reset(internal::factory<base::list<T>>::create(std::forward<U>(u)));
-
-			return *this;
-		}
-		
-		list<T>& operator*()
-		{
-			return *this;
-		}
-
-		list<T> operator+(T&& t)
-		{
-			return (*this)->add(std::move(t));
-		}
-	};
+			virtual ~list() {}
+			virtual std::size_t size() const = 0;
+			virtual bejocama::iterator<T> begin() = 0;
+			virtual bejocama::iterator<T> end() = 0;
+			virtual bejocama::list<T> add(T&& t) = 0;
+		};
+	}
 }
