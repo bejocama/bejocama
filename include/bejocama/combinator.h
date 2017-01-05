@@ -20,7 +20,7 @@
 #pragma once
 #include <iostream>
 #include <future>
-#include "bejocama/fmap.h"
+#include "bejocama/functor.h"
 #include "bejocama/list.h"
 
 namespace bejocama
