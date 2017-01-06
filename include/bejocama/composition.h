@@ -21,12 +21,27 @@
 #include "typelist.h"
 #include "traits.h"
 #include <future>
-#include <iostream>
+#include <utility>
+#include <tuple>
 
 namespace bejocama
 {
 	template<typename> struct maybe;
 	template<typename> struct list;
+
+	template<typename T>
+	struct make_tuple_index_sequence
+	{
+		static constexpr std::size_t N = std::tuple_size<T>::value;
+
+		using type = std::make_index_sequence<N>;
+	};
+	
+	template<typename O, typename F, typename P, size_t... I>
+	decltype(auto) apply(O&& o, F&& f, P&& p, std::index_sequence<I...>)
+	{
+		return (o.*f)(std::move(std::get<I>(std::forward<P>(p)))...);
+	}
 	
 	template<template<typename> class C, typename T>
 	static decltype(auto) make_type(T&& t)
@@ -40,9 +55,9 @@ namespace bejocama
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
-			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
 
-				return (o.*f)(std::forward<decltype(a)>(a)...);
+				return (o.*ff)(std::forward<decltype(a)>(a)...);
 			};
 		}
 	};
@@ -53,13 +68,13 @@ namespace bejocama
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
-			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
 
-				using type = decltype((*o.*f)(std::forward<decltype(a)>(a)...));
+				using type = decltype((*o.*ff)(std::forward<decltype(a)>(a)...));
 				
 				if (!o) return type();
 				
-				return (*o.*f)(std::forward<decltype(a)>(a)...);
+				return (*o.*ff)(std::forward<decltype(a)>(a)...);
 			};
 		}
 	};
@@ -70,13 +85,16 @@ namespace bejocama
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
-			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+			return [&f](auto&& o, auto&&... a) mutable {
 
-				auto l = [f(std::move(f)),o(std::move(o)),a...]() mutable {
+				auto l = [f,oo=std::move(o),
+						  p=std::make_tuple(std::forward<decltype(a)>(a)...)]() mutable {
 				
-					auto oo = std::move(o.get());
+					auto ooo = std::move(oo.get());
 
-					return (oo.*f)(std::move(a)...);
+					using seq = typename make_tuple_index_sequence<decltype(p)>::type;
+
+					return apply(ooo,f,p,seq{});
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -90,13 +108,16 @@ namespace bejocama
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
-			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+			return [&f](auto&& o, auto&&... a) mutable {
 
-				auto l = [f(std::move(f)),o(std::move(o)),a...]() mutable {
+				auto l = [f,oo=std::move(o),
+						  p=std::make_tuple(std::forward<decltype(a)>(a)...)]() mutable {
 
-					auto m = std::move(o.get());
+					auto m = std::move(oo.get());
+
+					using seq = typename make_tuple_index_sequence<decltype(p)>::type;
 					
-					return (*m.*f)(std::move(a)...);
+					return apply(*m,f,p,seq{});
 				};
 
 				return std::async(std::launch::async,std::move(l));
