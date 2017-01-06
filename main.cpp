@@ -18,7 +18,6 @@
 */
 
 #include "bejocama/composition.h"
-#include "bejocama/combinator.h"
 #include "bejocama/functional.h"
 #include "bejocama/iterator.h"
 #include "bejocama/file.h"
@@ -114,7 +113,7 @@ namespace bejocama
 		  The serial composition differs from parallel by a
 		  functional transformation.
 		 */
-		
+
 		auto result_serial = composer(curry<0>(fopen,returns(io(fn))),
 									  fstat,
 									  xmap,

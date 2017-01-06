@@ -18,7 +18,6 @@
 */
 
 #include "bejocama/composition.h"
-#include "bejocama/combinator.h"
 #include "bejocama/functional.h"
 #include "bejocama/file.h"
 #include "bejocama/iterator.h"

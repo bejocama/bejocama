@@ -34,7 +34,7 @@ namespace bejocama
 	template<typename T>
 	struct print
 	{
-		void operator()(const T& t)
+		void operator()(T&& t)
 		{
 			std::cout << t << std::endl;
 		}
@@ -164,7 +164,7 @@ namespace bejocama
 	}
 
 	template<typename T>
-	maybe<io> fcopy(io&& i, const T& t)
+	maybe<io> fcopy(io&& i, T&& t)
 	{
 		memcpy(i._map.start + i._map.poff,&t,sizeof(T));
 		
