@@ -20,9 +20,102 @@
 #pragma once
 #include "typelist.h"
 #include "traits.h"
+#include <future>
+#include <iostream>
 
 namespace bejocama
 {
+	template<typename> struct maybe;
+	template<typename> struct list;
+	
+	template<template<typename> class C, typename T>
+	static decltype(auto) make_type(T&& t)
+	{
+		return C<T>(t);
+	}
+
+	template<typename T>
+	struct morphism
+	{
+		template<typename F>
+		decltype(auto) operator()(F&& f)
+		{
+			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+
+				return (o.*f)(std::forward<decltype(a)>(a)...);
+			};
+		}
+	};
+
+	template<typename T>
+	struct morphism<maybe<T>>
+	{
+		template<typename F>
+		decltype(auto) operator()(F&& f)
+		{
+			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+
+				using type = decltype((*o.*f)(std::forward<decltype(a)>(a)...));
+				
+				if (!o) return type();
+				
+				return (*o.*f)(std::forward<decltype(a)>(a)...);
+			};
+		}
+	};
+
+	template<typename T>
+	struct morphism<std::future<T>>
+	{
+		template<typename F>
+		decltype(auto) operator()(F&& f)
+		{
+			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+
+				auto l = [f(std::move(f)),o(std::move(o)),a...]() mutable {
+				
+					auto oo = std::move(o.get());
+
+					return (oo.*f)(std::move(a)...);
+				};
+
+				return std::async(std::launch::async,std::move(l));
+			};
+		}
+	};
+
+	template<typename T>
+	struct morphism<std::future<maybe<T>>>
+	{
+		template<typename F>
+		decltype(auto) operator()(F&& f)
+		{
+			return [f(std::forward<F>(f))](auto&& o, auto&&... a) mutable {
+
+				auto l = [f(std::move(f)),o(std::move(o)),a...]() mutable {
+
+					auto m = std::move(o.get());
+					
+					return (*m.*f)(std::move(a)...);
+				};
+
+				return std::async(std::launch::async,std::move(l));
+			};
+		}
+	};
+
+	template<typename F>
+	decltype(auto) make_morphism(F&& f)
+	{
+		return [&f](auto&& o, auto&&... a) mutable {
+
+			using C = typename clear_type<decltype(o)>::type;
+
+			return morphism<C>()(std::forward<F>(f))
+				(std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
+		};
+	}
+	
 	template<typename A, typename B>
 	struct combinator;
 	
@@ -63,19 +156,11 @@ namespace bejocama
 			 typename... OBJECT>
 	decltype(auto) compose_object_typed(G&& g, F&& f, tag<typelist<METHOD...>,typelist<OBJECT...>>)
 	{
-		return [&g,f(std::move(std::forward<F>(f)))](OBJECT&&... object, METHOD&&... method) mutable {
+		return [g(std::forward<G>(g)),f(std::forward<F>(f))](OBJECT&&... object,
+															 METHOD&&... method) mutable {
 
-			auto val = std::move(f(std::forward<OBJECT>(object)...));
-
-			using VT = typename clear_type<decltype(val)>::type;
-
-			auto lambda = [&g, &method...](auto&& x) mutable {
-			
-				return (std::forward<decltype(x)>(x).*std::forward<G>(g))
-				(std::forward<METHOD>(method)...);
-			};
-			
-			return combinator<VT,VT>()(std::move(lambda))(std::move(val));
+			return make_morphism(g)(f(std::forward<OBJECT>(object)...),
+									std::forward<METHOD>(method)...);
 		};
 	}
 	

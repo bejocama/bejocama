@@ -29,7 +29,7 @@ namespace bejocama
 
 	template<typename T>
 	void add_and_print_file(string fn, T&& t)
-	{
+	{		
 		/*
 
 		  using helper in the case of overloaded function
@@ -54,6 +54,15 @@ namespace bejocama
 		auto m_plus = static_cast<list<T>(list<T>::*)(T&& t)>
 			(&list<T>::operator+);
 
+
+		/*
+		  Test of the curry function.
+		*/
+		
+		auto xmap = curry<1,1>(mmap<T>,
+							   returns(0),
+							   returns(0));
+		
 		/*
 		  make_async provides a function that starts a thread.
 		  The curry function helps to define the thread function.
@@ -63,14 +72,6 @@ namespace bejocama
 		*/
 		
 		auto xopen = make_async(curry<0>(fopen,returns(io(fn))));
-
-		/*
-		  Test of the curry function.
-		*/
-		
-		auto xmap = curry<1,1>(mmap<T>,
-							   returns(0),
-							   returns(0));
 
 		/*
 		  The xopen thread returns a future and the combinator moves 
@@ -84,8 +85,8 @@ namespace bejocama
 											  mkf,
 											  m_list,
 											  m_plus,
-											  print<T>()))(std::move(t));
-
+											  print<T>()))(T(t));
+		
 		/*
 		  Starting with the thread function xopen, all following steps
 		  are running in a separate thread. All result futures are moved
@@ -98,7 +99,7 @@ namespace bejocama
 									 mkf,
 									 m_list,
 									 m_plus,
-									 print<T>())(std::move(t));
+									 print<T>())(T(t));
 
 
 		/*
@@ -106,6 +107,7 @@ namespace bejocama
 		*/
 		
 		result_assoc.get();
+
 		result_every.get();
 
 		/*
@@ -119,7 +121,7 @@ namespace bejocama
 									  mkf,
 									  m_list,
 									  m_plus,
-									  print<T>())(std::move(t));
+									  print<T>())(T(t));
 
 		static_assert(std::is_same<decltype(result_assoc.get()),decltype(result_serial)>::value,
 					  "ERROR: types must be equal");
@@ -129,7 +131,6 @@ namespace bejocama
 	{
 		add_and_print_file<client>(std::string("client.data"),
 								   client{"tom", "orlando", .age=20,.height=178});
-
 
 		auto l = std::list<client>{client{"tom", "orlando", .age=20,.height=178}};
 
