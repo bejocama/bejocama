@@ -24,6 +24,7 @@ the close connection between the terms "code sequencing" and
 Status
 ------
 
+ * functors, make_morphism (fmap) are the base of compositions
  * a compose function that composes at any argument position
  * a variadic composer which composes at position 0
  * a curry functions that is variadic over positions
