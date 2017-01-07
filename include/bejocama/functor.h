@@ -256,9 +256,7 @@ namespace bejocama
 
 					auto m = std::move(oo.get());
 
-					if (!m) return R();
-
-					return (*m.*f)(std::move(a)...);
+					return morphism<maybe<T>,T,R>()(f)(std::move(m), std::forward<decltype(a)>(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -274,9 +272,12 @@ namespace bejocama
 				
 					auto ppp = std::move(pp.get());
 
-					if (!ppp) return R();
-
-					return f(std::move(b)..., std::move(*ppp), std::move(a)...);
+					return morphism<maybe<T>,T,R>()(f,
+													typelist<B...>{},
+													typelist<decltype(ppp)>{},
+													typelist<A...>{})(std::forward<B>(b)...,
+																	  std::move(ppp),
+																	  std::forward<A>(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -296,16 +297,12 @@ namespace bejocama
 
 					auto ppp = std::move(pp.get());
 
-					list<R> l;
-
-					auto it = ppp->begin();
-
-					while(it) {
-
-						l->append(f,b..., std::move(*it++), a...);
-					}
-
-					return l;
+					return morphism<list<T>,T,R>()(f,
+												   typelist<B...>{},
+												   typelist<decltype(ppp)>{},
+												   typelist<A...>{})(std::forward<B>(b)...,
+																	 std::move(ppp),
+																	 std::forward<A>(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(lambda));
@@ -325,14 +322,12 @@ namespace bejocama
 
 					auto ppp = std::move(pp.get());
 
-					auto it = ppp->begin();
-
-					while(it) {
-
-						f(b...,std::move(*it++),a...);
-					}
-
-					return maybe<bool>();
+					return morphism<list<T>,T,void>()(f,
+													  typelist<B...>{},
+													  typelist<decltype(ppp)>{},
+													  typelist<A...>{})(std::forward<B>(b)...,
+																		std::move(ppp),
+																		std::forward<A>(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(lambda));
