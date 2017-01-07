@@ -164,7 +164,7 @@ namespace bejocama
 	}
 
 	template<typename T>
-	maybe<io> fcopy(io&& i, T&& t)
+	maybe<io> fcopy(io&& i, const T& t)
 	{
 		memcpy(i._map.start + i._map.poff,&t,sizeof(T));
 		

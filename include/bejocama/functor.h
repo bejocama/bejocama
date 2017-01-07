@@ -396,13 +396,13 @@ namespace bejocama
 			constexpr size_t N = sizeof...(a);
 			
 			using itypes = typelist<typename clear_type<decltype(a)>::type...>;			
-			using BEFORE = typename tl_sub<itypes,0,P>::type;
-			using AFTER = typename tl_sub<itypes,P+1,N-P-1>::type;
 			using IT = typename clear_type<typename tl_get<itypes,P>::type>::type;
 
 			using otypes = typename function_traits<typename clear_type<F>::type>::atype;
 			using OT = typename clear_type<typename tl_get<otypes,P>::type>::type;
-						
+			using BEFORE = typename tl_sub<otypes,0,P>::type;
+			using AFTER = typename tl_sub<otypes,P+1,N-P-1>::type;
+			
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
 			
 			return morphism<IT,OT,RT>()(std::forward<F>(f),
