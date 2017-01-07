@@ -40,16 +40,16 @@ namespace bejocama
 	template<typename O, typename F, typename P, size_t... I>
 	decltype(auto) apply(O&& o, F&& f, P&& p, std::index_sequence<I...>)
 	{
-		return (o.*f)(std::move(std::get<I>(std::forward<P>(p)))...);
+		return (o.*f)(std::get<I>(std::forward<P>(p))...);
 	}
 
 	template<typename F, typename B, typename P, typename A, size_t... IB, size_t... IA>
 	decltype(auto) apply(F&& f, B&& b, P&& p, A&& a,
 						 std::index_sequence<IB...>, std::index_sequence<IA...>)
 	{
-		return f(std::move(std::get<IB>(std::forward<B>(b)))...,
-				 std::move(std::forward<P>(p)),
-				 std::move(std::get<IA>(std::forward<A>(a)))...);
+		return f(std::get<IB>(std::forward<B>(b))...,
+				 std::forward<P>(p),
+				 std::get<IA>(std::forward<A>(a))...);
 	}
 	
 	template<template<typename> class C, typename T>
@@ -175,9 +175,9 @@ namespace bejocama
 
 				if (!p) return R();
 				
-				return ff(std::move(std::forward<decltype(b)>(b))...,
+				return ff(std::forward<decltype(b)>(b)...,
 						  std::move(*std::forward<decltype(p)>(p)),
-						  std::move(std::forward<decltype(a)>(a))...);
+						  std::forward<decltype(a)>(a)...);
 			};
 		}
 	};
@@ -205,9 +205,9 @@ namespace bejocama
 
 				if (!p) return R();
 				
-				return ff(std::move(std::forward<decltype(b)>(b))...,
+				return ff(std::forward<decltype(b)>(b)...,
 						  std::move(*std::forward<decltype(p)>(p)),
-						  std::move(std::forward<decltype(a)>(a))...);
+						  std::forward<decltype(a)>(a)...);
 			};
 		}
 	};
@@ -220,14 +220,11 @@ namespace bejocama
 		{
 			return [&f](auto&& o, auto&&... a) mutable {
 
-				auto l = [f,oo=std::move(o),
-						  p=std::make_tuple(std::forward<decltype(a)>(a)...)]() mutable {
+				auto l = [f,oo=std::move(o),&a...]() mutable {
 				
 					auto ooo = std::move(oo.get());
 
-					using seq = typename make_tuple_index_sequence<decltype(p)>::type;
-
-					return apply(ooo,f,p,seq{});
+					return (ooo.*f)(std::move(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -239,18 +236,14 @@ namespace bejocama
 		{
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-				auto l = [f,
-						  pb=std::make_tuple(std::forward<decltype(b)>(b)...),
+				auto l = [f, &b...,
 						  pp=std::move(p),
-						  pa=std::make_tuple(std::forward<decltype(a)>(a)...)
+						  &a...
 						  ]() mutable {
 				
 					auto ppp = std::move(pp.get());
 
-					using seqb = typename make_tuple_index_sequence<decltype(pb)>::type;
-					using seqa = typename make_tuple_index_sequence<decltype(pa)>::type;
-					
-					return apply(f,pb,ppp,pa,seqb{},seqa{});
+					return f(std::move(b)..., std::move(ppp), std::move(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -266,14 +259,11 @@ namespace bejocama
 		{
 			return [&f](auto&& o, auto&&... a) mutable {
 
-				auto l = [f,oo=std::move(o),
-						  p=std::make_tuple(std::forward<decltype(a)>(a)...)]() mutable {
+				auto l = [f,oo=std::move(o), &a...]() mutable {
 
 					auto m = std::move(oo.get());
 
-					using seq = typename make_tuple_index_sequence<decltype(p)>::type;
-					
-					return apply(*m,f,p,seq{});
+					return (*m.*f)(std::move(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -286,17 +276,14 @@ namespace bejocama
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
 				auto l = [f,
-						  pb=std::make_tuple(std::forward<decltype(b)>(b)...),
+						  &b...,
 						  pp=std::move(p),
-						  pa=std::make_tuple(std::forward<decltype(a)>(a)...)
+						  &a...
 						  ]() mutable {
 				
 					auto ppp = std::move(pp.get());
 
-					using seqb = typename make_tuple_index_sequence<decltype(pb)>::type;
-					using seqa = typename make_tuple_index_sequence<decltype(pa)>::type;
-					
-					return apply(f,pb,*ppp,pa,seqb{},seqa{});
+					return f(std::move(b)..., std::move(*ppp), std::move(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -313,14 +300,11 @@ namespace bejocama
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
 				auto lambda = [f,
-							   pb=std::make_tuple(std::forward<decltype(b)>(b)...),
+							   &b...,
 							   pp=std::move(p),
-							   pa=std::make_tuple(std::forward<decltype(a)>(a)...)
+							   &a...
 							   ]() mutable {
 
-					using seqb = typename make_tuple_index_sequence<decltype(pb)>::type;
-					using seqa = typename make_tuple_index_sequence<decltype(pa)>::type;
-					
 					auto ppp = std::move(pp.get());
 
 					list<R> l;
@@ -329,7 +313,7 @@ namespace bejocama
 
 					while(it) {
 
-						l->append(apply(f,pb,*it++,pa,seqb{},seqa{}));
+						l->append(f,b..., std::move(*it++), a...);
 					}
 
 					return l;
@@ -349,21 +333,18 @@ namespace bejocama
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
 				auto lambda = [f,
-							   pb=std::make_tuple(std::forward<decltype(b)>(b)...),
+							   &b...,
 							   pp=std::move(p),
-							   pa=std::make_tuple(std::forward<decltype(a)>(a)...)
+							   &a...
 							   ]() mutable {
 
-					using seqb = typename make_tuple_index_sequence<decltype(pb)>::type;
-					using seqa = typename make_tuple_index_sequence<decltype(pa)>::type;
-					
 					auto ppp = std::move(pp.get());
 
 					auto it = ppp->begin();
 
 					while(it) {
 
-						apply(f,pb,*it++,pa,seqb{},seqa{});
+						f(b...,std::move(*it++),a...);
 					}
 
 					return maybe<bool>();
