@@ -160,9 +160,7 @@ namespace bejocama
 		{
 			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
 
-				using type = decltype((*o.*ff)(std::forward<decltype(a)>(a)...));
-				
-				if (!o) return type();
+				if (!o) return R();
 				
 				return (*o.*ff)(std::forward<decltype(a)>(a)...);
 			};
@@ -190,9 +188,7 @@ namespace bejocama
 		{
 			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
 
-				using type = decltype((*o.*ff)(std::forward<decltype(a)>(a)...));
-				
-				if (!o) return type();
+				if (!o) return R();
 				
 				return (*o.*ff)(std::forward<decltype(a)>(a)...);
 			};
@@ -236,10 +232,7 @@ namespace bejocama
 		{
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-				auto l = [f, &b...,
-						  pp=std::move(p),
-						  &a...
-						  ]() mutable {
+				auto l = [f, &b..., pp=std::move(p), &a...]() mutable {
 				
 					auto ppp = std::move(pp.get());
 
@@ -263,6 +256,8 @@ namespace bejocama
 
 					auto m = std::move(oo.get());
 
+					if (!m) return R();
+
 					return (*m.*f)(std::move(a)...);
 				};
 
@@ -275,13 +270,11 @@ namespace bejocama
 		{
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-				auto l = [f,
-						  &b...,
-						  pp=std::move(p),
-						  &a...
-						  ]() mutable {
+				auto l = [f, &b..., pp=std::move(p), &a...]() mutable {
 				
 					auto ppp = std::move(pp.get());
+
+					if (!ppp) return R();
 
 					return f(std::move(b)..., std::move(*ppp), std::move(a)...);
 				};
@@ -299,11 +292,7 @@ namespace bejocama
 		{
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-				auto lambda = [f,
-							   &b...,
-							   pp=std::move(p),
-							   &a...
-							   ]() mutable {
+				auto lambda = [f, &b..., pp=std::move(p), &a...]() mutable {
 
 					auto ppp = std::move(pp.get());
 
@@ -321,7 +310,7 @@ namespace bejocama
 
 				return std::async(std::launch::async,std::move(lambda));
 			};
-		}		
+		}
 	};
 
 	template<typename T>
@@ -332,11 +321,7 @@ namespace bejocama
 		{
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-				auto lambda = [f,
-							   &b...,
-							   pp=std::move(p),
-							   &a...
-							   ]() mutable {
+				auto lambda = [f, &b..., pp=std::move(p), &a...]() mutable {
 
 					auto ppp = std::move(pp.get());
 
