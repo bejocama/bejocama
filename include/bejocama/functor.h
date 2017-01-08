@@ -61,12 +61,12 @@ namespace bejocama
 	template<typename I, typename O, typename R>
 	struct morphism
 	{
-		template<typename F>
-		decltype(auto) operator()(F&& f)
+		template<typename F, typename P, typename... A>
+		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
 		{
-			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
+			return [&f](P&& p, A&&... a) mutable {
 
-				return (o.*ff)(std::forward<decltype(a)>(a)...);
+				return (p.*f)(std::forward<A>(a)...);
 			};
 		}
 
@@ -85,12 +85,12 @@ namespace bejocama
 	template<typename T, typename R>
 	struct morphism<T,T,R>
 	{
-		template<typename F>
-		decltype(auto) operator()(F&& f)
+		template<typename F, typename O, typename... A>
+		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
 		{
-			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
+			return [&f](O&& o, A&&... a) mutable {
 
-				return (o.*ff)(std::forward<decltype(a)>(a)...);
+				return (o.*f)(std::forward<A>(a)...);
 			};
 		}
 
@@ -155,15 +155,15 @@ namespace bejocama
 	template<typename T, typename R>
 	struct morphism<maybe<T>,T,R>
 	{
-		template<typename F>
-		decltype(auto) operator()(F&& f)
+		template<typename F, typename P, typename... A>
+		decltype(auto) operator()(F&& f, typelist<P>, typelist<A...>)
 		{
-			return [&f](auto&& o, auto&&... a) mutable {
+			return [&f](P&& p, A&&... a) mutable {
 
-				if (!o) return R();
+				if (!p) return R();
 				
-				return morphism<T,T,R>()(std::forward<F>(f))
-					(*std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
+				return morphism<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
+					(std::move(*std::forward<P>(p)), std::forward<A>(a)...);
 			};
 		}
 
@@ -188,13 +188,13 @@ namespace bejocama
 	template<typename T, typename R>
 	struct morphism<maybe<T*>,T,R>
 	{
-		template<typename F>
-		decltype(auto) operator()(F&& f)
+		template<typename F, typename O, typename... A>
+		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
 		{
-			return [&f](auto&& o, auto&&... a) mutable {
+			return [&f](O&& o, A&&... a) mutable {
 
-				return morphism<maybe<T>,T,R>()(std::forward<F>(f))
-					(std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
+				return morphism<maybe<T>,T,R>()(std::forward<F>(f), typelist<O>{}, typelist<A...>{})
+					(std::forward<O>(o), std::forward<A>(a)...);
 			};
 		}
 
@@ -218,17 +218,15 @@ namespace bejocama
 	template<typename T, typename R>
 	struct morphism<std::future<T>,T,R>
 	{
-		template<typename F>
-		decltype(auto) operator()(F&& f)
+		template<typename F, typename O, typename... A>
+		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
 		{
-			return [&f](auto&& o, auto&&... a) mutable {
+			return [&f](O&& o, A&&... a) mutable {
 
 				auto l = [&f,oo=std::move(o),&a...]() mutable {
 				
-					auto ooo = std::move(oo.get());
-
-					return morphism<T,T,R>()(std::forward<F>(f))
-					(ooo, std::move(a)...);
+					return morphism<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
+					(std::move(oo.get()), std::forward<A>(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -260,16 +258,15 @@ namespace bejocama
 	template<typename T, typename R>
 	struct morphism<std::future<maybe<T>>,T,R>
 	{
-		template<typename F>
-		decltype(auto) operator()(F&& f)
+		template<typename F, typename O, typename... A>
+			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
 		{
-			return [&f](auto&& o, auto&&... a) mutable {
+			return [&f](O&& o, A&&... a) mutable {
 
 				auto l = [f,oo=std::move(o), &a...]() mutable {
 
-					auto m = std::move(oo.get());
-
-					return morphism<maybe<T>,T,R>()(f)(std::move(m), std::forward<decltype(a)>(a)...);
+					return morphism<maybe<T>,T,R>()(f, typelist<maybe<T>>{}, typelist<A...>{})
+					(std::move(oo.get()), std::forward<A>(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -356,8 +353,9 @@ namespace bejocama
 			using IT = typename clear_type<decltype(o)>::type;
 			using OT = typename function_traits<typename clear_type<F>::type>::ctype;
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
+			using MT = typename function_traits<typename clear_type<F>::type>::atype;
 
-			return morphism<IT,OT,RT>()(std::forward<F>(f))
+			return morphism<IT,OT,RT>()(std::forward<F>(f),typelist<IT>{}, MT{})
 				(std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
 		};
 	}
