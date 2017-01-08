@@ -158,24 +158,29 @@ namespace bejocama
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
-			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
+			return [&f](auto&& o, auto&&... a) mutable {
 
 				if (!o) return R();
 				
-				return (*o.*ff)(std::forward<decltype(a)>(a)...);
+				return morphism<T,T,R>()(std::forward<F>(f))
+					(*std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
 			};
 		}
 
 		template<typename F, typename... B, typename P, typename... A>
 		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
 		{
-			return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
+			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
 				if (!p) return R();
-				
-				return ff(std::forward<decltype(b)>(b)...,
-						  std::move(*std::forward<decltype(p)>(p)),
-						  std::forward<decltype(a)>(a)...);
+
+				return morphism<T,T,R>()(std::forward<F>(f),
+										 typelist<B...>{},
+										 typelist<T>{},
+										 typelist<A...>{})
+					(std::forward<B>(b)...,
+					 std::move(*std::forward<P>(p)),
+					 std::forward<A>(a)...);
 			};
 		}
 	};
@@ -186,24 +191,26 @@ namespace bejocama
 		template<typename F>
 		decltype(auto) operator()(F&& f)
 		{
-			return [ff=std::forward<F>(f)](auto&& o, auto&&... a) mutable {
+			return [&f](auto&& o, auto&&... a) mutable {
 
-				if (!o) return R();
-				
-				return (*o.*ff)(std::forward<decltype(a)>(a)...);
+				return morphism<maybe<T>,T,R>()(std::forward<F>(f))
+					(std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
 			};
 		}
 
 		template<typename F, typename... B, typename P, typename... A>
 		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
 		{
-			return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
+			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-				if (!p) return R();
-				
-				return ff(std::forward<decltype(b)>(b)...,
-						  std::move(*std::forward<decltype(p)>(p)),
-						  std::forward<decltype(a)>(a)...);
+				return morphism<maybe<T>,T,R>()
+					(std::forward<F>(f),
+					 typelist<B...>{},
+					 typelist<P>{},
+					 typelist<A...>{})
+					(std::forward<B>(b)...,
+					 std::forward<P>(p),
+					 std::forward<A>(a)...);
 			};
 		}
 	};
@@ -216,11 +223,12 @@ namespace bejocama
 		{
 			return [&f](auto&& o, auto&&... a) mutable {
 
-				auto l = [f,oo=std::move(o),&a...]() mutable {
+				auto l = [&f,oo=std::move(o),&a...]() mutable {
 				
 					auto ooo = std::move(oo.get());
 
-					return (ooo.*f)(std::move(a)...);
+					return morphism<T,T,R>()(std::forward<F>(f))
+					(ooo, std::move(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
@@ -232,11 +240,16 @@ namespace bejocama
 		{
 			return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-				auto l = [f, &b..., pp=std::move(p), &a...]() mutable {
+				auto l = [&f, &b..., pp=std::move(p), &a...]() mutable {
 				
 					auto ppp = std::move(pp.get());
 
-					return f(std::move(b)..., std::move(ppp), std::move(a)...);
+					return morphism<T,T,R>()
+					(std::forward<F>(f),
+					 typelist<B...>{},
+					 typelist<T>{},
+					 typelist<A...>{})
+					(std::forward<B>(b)..., ppp, std::forward<A>(a)...);
 				};
 
 				return std::async(std::launch::async,std::move(l));
