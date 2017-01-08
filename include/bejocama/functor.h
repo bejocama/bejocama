@@ -62,7 +62,7 @@ namespace bejocama
 	{
 	
 		template<typename I, typename O, typename R>
-		struct generator
+		struct fmap
 		{
 			template<typename F, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
@@ -86,7 +86,7 @@ namespace bejocama
 		};
 	
 		template<typename T, typename R>
-		struct generator<T,T,R>
+		struct fmap<T,T,R>
 		{
 			template<typename F, typename O, typename... A>
 			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
@@ -110,7 +110,7 @@ namespace bejocama
 		};
 
 		template<typename T, typename R>
-		struct generator<list<T>,T,R>
+		struct fmap<list<T>,T,R>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -134,7 +134,7 @@ namespace bejocama
 		};
 
 		template<typename T>
-		struct generator<list<T>,T,void>
+		struct fmap<list<T>,T,void>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -156,7 +156,7 @@ namespace bejocama
 		};
 	
 		template<typename T, typename R>
-		struct generator<maybe<T>,T,R>
+		struct fmap<maybe<T>,T,R>
 		{
 			template<typename F, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<P>, typelist<A...>)
@@ -165,7 +165,7 @@ namespace bejocama
 
 					if (!p) return R();
 				
-					return generator<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
+					return fmap<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
 						(std::move(*std::forward<P>(p)), std::forward<A>(a)...);
 				};
 			}
@@ -177,7 +177,7 @@ namespace bejocama
 
 					if (!p) return R();
 
-					return generator<T,T,R>()(std::forward<F>(f),
+					return fmap<T,T,R>()(std::forward<F>(f),
 											  typelist<B...>{},
 											  typelist<T>{},
 											  typelist<A...>{})
@@ -189,14 +189,14 @@ namespace bejocama
 		};
 		
 		template<typename T, typename R>
-		struct generator<maybe<T*>,T,R>
+		struct fmap<maybe<T*>,T,R>
 		{
 			template<typename F, typename O, typename... A>
 			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
 			{
 				return [&f](O&& o, A&&... a) mutable {
 
-					return generator<maybe<T>,T,R>()(std::forward<F>(f), typelist<O>{}, typelist<A...>{})
+					return fmap<maybe<T>,T,R>()(std::forward<F>(f), typelist<O>{}, typelist<A...>{})
 						(std::forward<O>(o), std::forward<A>(a)...);
 				};
 			}
@@ -206,7 +206,7 @@ namespace bejocama
 			{
 				return [&f](B&&... b, P&& p, A&&... a) mutable {
 
-					return generator<maybe<T>,T,R>()
+					return fmap<maybe<T>,T,R>()
 						(std::forward<F>(f),
 						 typelist<B...>{},
 						 typelist<P>{},
@@ -219,7 +219,7 @@ namespace bejocama
 		};
 	
 		template<typename T, typename R>
-		struct generator<std::future<T>,T,R>
+		struct fmap<std::future<T>,T,R>
 		{
 			template<typename F, typename O, typename... A>
 			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
@@ -228,7 +228,7 @@ namespace bejocama
 
 					auto l = [&f,oo=std::move(o),&a...]() mutable {
 				
-						return generator<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
+						return fmap<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
 						(std::move(oo.get()), std::forward<A>(a)...);
 					};
 
@@ -245,7 +245,7 @@ namespace bejocama
 				
 						auto ppp = std::move(pp.get());
 
-						return generator<T,T,R>()
+						return fmap<T,T,R>()
 						(std::forward<F>(f),
 						 typelist<B...>{},
 						 typelist<T>{},
@@ -259,7 +259,7 @@ namespace bejocama
 		};
 
 		template<typename T, typename R>
-		struct generator<std::future<maybe<T>>,T,R>
+		struct fmap<std::future<maybe<T>>,T,R>
 		{
 			template<typename F, typename O, typename... A>
 			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
@@ -268,7 +268,7 @@ namespace bejocama
 
 					auto l = [f,oo=std::move(o), &a...]() mutable {
 
-						return generator<maybe<T>,T,R>()(f, typelist<maybe<T>>{}, typelist<A...>{})
+						return fmap<maybe<T>,T,R>()(f, typelist<maybe<T>>{}, typelist<A...>{})
 						(std::move(oo.get()), std::forward<A>(a)...);
 					};
 
@@ -285,7 +285,7 @@ namespace bejocama
 				
 						auto ppp = std::move(pp.get());
 
-						return generator<maybe<T>,T,R>()
+						return fmap<maybe<T>,T,R>()
 						(f,
 						 typelist<B...>{},
 						 typelist<decltype(ppp)>{},
@@ -300,7 +300,7 @@ namespace bejocama
 		};
 
 		template<typename T, typename R>
-		struct generator<std::future<list<T>>,T,R>
+		struct fmap<std::future<list<T>>,T,R>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -311,7 +311,7 @@ namespace bejocama
 
 						auto ppp = std::move(pp.get());
 						
-						return generator<list<T>,T,R>()
+						return fmap<list<T>,T,R>()
 						(f,
 						 typelist<B...>{},
 						 typelist<decltype(ppp)>{},
@@ -326,7 +326,7 @@ namespace bejocama
 		};
 
 		template<typename T>
-		struct generator<std::future<list<T>>,T,void>
+		struct fmap<std::future<list<T>>,T,void>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -337,7 +337,7 @@ namespace bejocama
 
 						auto ppp = std::move(pp.get());
 
-						return generator<list<T>,T,void>()
+						return fmap<list<T>,T,void>()
 						(f,
 						 typelist<B...>{},
 						 typelist<decltype(ppp)>{},
@@ -362,7 +362,7 @@ namespace bejocama
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
 			using MT = typename function_traits<typename clear_type<F>::type>::atype;
 
-			return functor::generator<IT,OT,RT>()
+			return functor::fmap<IT,OT,RT>()
 				(std::forward<F>(f),typelist<IT>{}, MT{})
 				(std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
 		};
@@ -385,7 +385,7 @@ namespace bejocama
 			
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
 			
-			return functor::generator<IT,OT,RT>()
+			return functor::fmap<IT,OT,RT>()
 				(std::forward<F>(f),
 				 BEFORE{},
 				 typelist<IT>{},
