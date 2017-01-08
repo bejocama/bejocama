@@ -58,293 +58,300 @@ namespace bejocama
 		return C<T>(t);
 	}
 
-	template<typename I, typename O, typename R>
-	struct morphism
+	namespace functor
 	{
-		template<typename F, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
-		{
-			return [&f](P&& p, A&&... a) mutable {
-
-				return (p.*f)(std::forward<A>(a)...);
-			};
-		}
-
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
-		{
-			return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
-
-				return ff(std::forward<decltype(b)>(b)...,
-						  std::forward<decltype(p)>(p),
-						  std::forward<decltype(a)>(a)...);
-			};
-		}
-	};
 	
-	template<typename T, typename R>
-	struct morphism<T,T,R>
-	{
-		template<typename F, typename O, typename... A>
-		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
+		template<typename I, typename O, typename R>
+		struct generator
 		{
-			return [&f](O&& o, A&&... a) mutable {
-
-				return (o.*f)(std::forward<A>(a)...);
-			};
-		}
-
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
-		{
-			return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
-
-				return ff(std::forward<decltype(b)>(b)...,
-						  std::forward<decltype(p)>(p),
-						  std::forward<decltype(a)>(a)...);
-			};
-		}
-	};
-
-	template<typename T, typename R>
-	struct morphism<list<T>,T,R>
-	{
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
-		{
-			return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
-
-				list<R> l;
-
-				auto it = p->begin();
-
-				while(it) {
-
-					l->append(ff(std::forward<decltype(b)>(b)...,
-								 *it++,
-								 std::forward<decltype(a)>(a)...));
-				}
-				
-				return l;
-			};
-		}
-	};
-
-	template<typename T>
-	struct morphism<list<T>,T,void>
-	{
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
-		{
-			return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
-
-				auto it = p->begin();
-
-				while(it) {
-
-					ff(std::forward<decltype(b)>(b)...,
-					   std::move(*it++),
-					   std::forward<decltype(a)>(a)...);
-				}
-
-				return maybe<bool>();
-			};
-		}
-	};
-	
-	template<typename T, typename R>
-	struct morphism<maybe<T>,T,R>
-	{
-		template<typename F, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<P>, typelist<A...>)
-		{
-			return [&f](P&& p, A&&... a) mutable {
-
-				if (!p) return R();
-				
-				return morphism<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
-					(std::move(*std::forward<P>(p)), std::forward<A>(a)...);
-			};
-		}
-
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
-		{
-			return [&f](B&&... b, P&& p, A&&... a) mutable {
-
-				if (!p) return R();
-
-				return morphism<T,T,R>()(std::forward<F>(f),
-										 typelist<B...>{},
-										 typelist<T>{},
-										 typelist<A...>{})
-					(std::forward<B>(b)...,
-					 std::move(*std::forward<P>(p)),
-					 std::forward<A>(a)...);
-			};
-		}
-	};
-
-	template<typename T, typename R>
-	struct morphism<maybe<T*>,T,R>
-	{
-		template<typename F, typename O, typename... A>
-		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
-		{
-			return [&f](O&& o, A&&... a) mutable {
-
-				return morphism<maybe<T>,T,R>()(std::forward<F>(f), typelist<O>{}, typelist<A...>{})
-					(std::forward<O>(o), std::forward<A>(a)...);
-			};
-		}
-
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
-		{
-			return [&f](B&&... b, P&& p, A&&... a) mutable {
-
-				return morphism<maybe<T>,T,R>()
-					(std::forward<F>(f),
-					 typelist<B...>{},
-					 typelist<P>{},
-					 typelist<A...>{})
-					(std::forward<B>(b)...,
-					 std::forward<P>(p),
-					 std::forward<A>(a)...);
-			};
-		}
-	};
-	
-	template<typename T, typename R>
-	struct morphism<std::future<T>,T,R>
-	{
-		template<typename F, typename O, typename... A>
-		decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
-		{
-			return [&f](O&& o, A&&... a) mutable {
-
-				auto l = [&f,oo=std::move(o),&a...]() mutable {
-				
-					return morphism<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
-					(std::move(oo.get()), std::forward<A>(a)...);
-				};
-
-				return std::async(std::launch::async,std::move(l));
-			};
-		}
-
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
-		{
-			return [&f](B&&... b, P&& p, A&&... a) mutable {
-
-				auto l = [&f, &b..., pp=std::move(p), &a...]() mutable {
-				
-					auto ppp = std::move(pp.get());
-
-					return morphism<T,T,R>()
-					(std::forward<F>(f),
-					 typelist<B...>{},
-					 typelist<T>{},
-					 typelist<A...>{})
-					(std::forward<B>(b)..., ppp, std::forward<A>(a)...);
-				};
-
-				return std::async(std::launch::async,std::move(l));
-			};
-		}
-	};
-
-	template<typename T, typename R>
-	struct morphism<std::future<maybe<T>>,T,R>
-	{
-		template<typename F, typename O, typename... A>
+			template<typename F, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
-		{
-			return [&f](O&& o, A&&... a) mutable {
+			{
+				return [&f](P&& p, A&&... a) mutable {
 
-				auto l = [f,oo=std::move(o), &a...]() mutable {
-
-					return morphism<maybe<T>,T,R>()(f, typelist<maybe<T>>{}, typelist<A...>{})
-					(std::move(oo.get()), std::forward<A>(a)...);
+					return (p.*f)(std::forward<A>(a)...);
 				};
+			}
 
-				return std::async(std::launch::async,std::move(l));
-			};
-		}
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
 
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+					return ff(std::forward<decltype(b)>(b)...,
+							  std::forward<decltype(p)>(p),
+							  std::forward<decltype(a)>(a)...);
+				};
+			}
+		};
+	
+		template<typename T, typename R>
+		struct generator<T,T,R>
 		{
-			return [&f](B&&... b, P&& p, A&&... a) mutable {
+			template<typename F, typename O, typename... A>
+			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
+			{
+				return [&f](O&& o, A&&... a) mutable {
 
-				auto l = [f, &b..., pp=std::move(p), &a...]() mutable {
+					return (o.*f)(std::forward<A>(a)...);
+				};
+			}
+
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
+
+					return ff(std::forward<decltype(b)>(b)...,
+							  std::forward<decltype(p)>(p),
+							  std::forward<decltype(a)>(a)...);
+				};
+			}
+		};
+
+		template<typename T, typename R>
+		struct generator<list<T>,T,R>
+		{
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
+
+					list<R> l;
+
+					auto it = p->begin();
+
+					while(it) {
+
+						l->append(ff(std::forward<decltype(b)>(b)...,
+									 *it++,
+									 std::forward<decltype(a)>(a)...));
+					}
 				
-					auto ppp = std::move(pp.get());
-
-					return morphism<maybe<T>,T,R>()(f,
-													typelist<B...>{},
-													typelist<decltype(ppp)>{},
-													typelist<A...>{})(std::forward<B>(b)...,
-																	  std::move(ppp),
-																	  std::forward<A>(a)...);
+					return l;
 				};
+			}
+		};
 
-				return std::async(std::launch::async,std::move(l));
-			};
-		}		
-	};
-
-	template<typename T, typename R>
-	struct morphism<std::future<list<T>>,T,R>
-	{
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+		template<typename T>
+		struct generator<list<T>,T,void>
 		{
-			return [&f](B&&... b, P&& p, A&&... a) mutable {
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [ff=std::forward<F>(f)](B&&... b, P&& p, A&&... a) mutable {
 
-				auto lambda = [f, &b..., pp=std::move(p), &a...]() mutable {
+					auto it = p->begin();
 
-					auto ppp = std::move(pp.get());
+					while(it) {
 
-					return morphism<list<T>,T,R>()(f,
-												   typelist<B...>{},
-												   typelist<decltype(ppp)>{},
-												   typelist<A...>{})(std::forward<B>(b)...,
-																	 std::move(ppp),
-																	 std::forward<A>(a)...);
+						ff(std::forward<decltype(b)>(b)...,
+						   std::move(*it++),
+						   std::forward<decltype(a)>(a)...);
+					}
+
+					return maybe<bool>();
 				};
-
-				return std::async(std::launch::async,std::move(lambda));
-			};
-		}
-	};
-
-	template<typename T>
-	struct morphism<std::future<list<T>>,T,void>
-	{
-		template<typename F, typename... B, typename P, typename... A>
-		decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			}
+		};
+	
+		template<typename T, typename R>
+		struct generator<maybe<T>,T,R>
 		{
-			return [&f](B&&... b, P&& p, A&&... a) mutable {
+			template<typename F, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<P>, typelist<A...>)
+			{
+				return [&f](P&& p, A&&... a) mutable {
 
-				auto lambda = [f, &b..., pp=std::move(p), &a...]() mutable {
-
-					auto ppp = std::move(pp.get());
-
-					return morphism<list<T>,T,void>()(f,
-													  typelist<B...>{},
-													  typelist<decltype(ppp)>{},
-													  typelist<A...>{})(std::forward<B>(b)...,
-																		std::move(ppp),
-																		std::forward<A>(a)...);
+					if (!p) return R();
+				
+					return generator<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
+						(std::move(*std::forward<P>(p)), std::forward<A>(a)...);
 				};
+			}
 
-				return std::async(std::launch::async,std::move(lambda));
-			};
-		}
-	};
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [&f](B&&... b, P&& p, A&&... a) mutable {
 
+					if (!p) return R();
+
+					return generator<T,T,R>()(std::forward<F>(f),
+											  typelist<B...>{},
+											  typelist<T>{},
+											  typelist<A...>{})
+						(std::forward<B>(b)...,
+						 std::move(*std::forward<P>(p)),
+						 std::forward<A>(a)...);
+				};
+			}
+		};
+		
+		template<typename T, typename R>
+		struct generator<maybe<T*>,T,R>
+		{
+			template<typename F, typename O, typename... A>
+			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
+			{
+				return [&f](O&& o, A&&... a) mutable {
+
+					return generator<maybe<T>,T,R>()(std::forward<F>(f), typelist<O>{}, typelist<A...>{})
+						(std::forward<O>(o), std::forward<A>(a)...);
+				};
+			}
+
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [&f](B&&... b, P&& p, A&&... a) mutable {
+
+					return generator<maybe<T>,T,R>()
+						(std::forward<F>(f),
+						 typelist<B...>{},
+						 typelist<P>{},
+						 typelist<A...>{})
+						(std::forward<B>(b)...,
+						 std::forward<P>(p),
+						 std::forward<A>(a)...);
+				};
+			}
+		};
+	
+		template<typename T, typename R>
+		struct generator<std::future<T>,T,R>
+		{
+			template<typename F, typename O, typename... A>
+			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
+			{
+				return [&f](O&& o, A&&... a) mutable {
+
+					auto l = [&f,oo=std::move(o),&a...]() mutable {
+				
+						return generator<T,T,R>()(std::forward<F>(f), typelist<T>{}, typelist<A...>{})
+						(std::move(oo.get()), std::forward<A>(a)...);
+					};
+
+					return std::async(std::launch::async,std::move(l));
+				};
+			}
+
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [&f](B&&... b, P&& p, A&&... a) mutable {
+
+					auto l = [&f, &b..., pp=std::move(p), &a...]() mutable {
+				
+						auto ppp = std::move(pp.get());
+
+						return generator<T,T,R>()
+						(std::forward<F>(f),
+						 typelist<B...>{},
+						 typelist<T>{},
+						 typelist<A...>{})
+						(std::forward<B>(b)..., ppp, std::forward<A>(a)...);
+					};
+
+					return std::async(std::launch::async,std::move(l));
+				};
+			}
+		};
+
+		template<typename T, typename R>
+		struct generator<std::future<maybe<T>>,T,R>
+		{
+			template<typename F, typename O, typename... A>
+			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
+			{
+				return [&f](O&& o, A&&... a) mutable {
+
+					auto l = [f,oo=std::move(o), &a...]() mutable {
+
+						return generator<maybe<T>,T,R>()(f, typelist<maybe<T>>{}, typelist<A...>{})
+						(std::move(oo.get()), std::forward<A>(a)...);
+					};
+
+					return std::async(std::launch::async,std::move(l));
+				};
+			}
+
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [&f](B&&... b, P&& p, A&&... a) mutable {
+
+					auto l = [f, &b..., pp=std::move(p), &a...]() mutable {
+				
+						auto ppp = std::move(pp.get());
+
+						return generator<maybe<T>,T,R>()
+						(f,
+						 typelist<B...>{},
+						 typelist<decltype(ppp)>{},
+						 typelist<A...>{})(std::forward<B>(b)...,
+										   std::move(ppp),
+										   std::forward<A>(a)...);
+					};
+
+					return std::async(std::launch::async,std::move(l));
+				};
+			}
+		};
+
+		template<typename T, typename R>
+		struct generator<std::future<list<T>>,T,R>
+		{
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [&f](B&&... b, P&& p, A&&... a) mutable {
+
+					auto lambda = [f, &b..., pp=std::move(p), &a...]() mutable {
+
+						auto ppp = std::move(pp.get());
+						
+						return generator<list<T>,T,R>()
+						(f,
+						 typelist<B...>{},
+						 typelist<decltype(ppp)>{},
+						 typelist<A...>{})(std::forward<B>(b)...,
+										   std::move(ppp),
+										   std::forward<A>(a)...);
+					};
+
+					return std::async(std::launch::async,std::move(lambda));
+				};
+			}
+		};
+
+		template<typename T>
+		struct generator<std::future<list<T>>,T,void>
+		{
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
+			{
+				return [&f](B&&... b, P&& p, A&&... a) mutable {
+
+					auto lambda = [f, &b..., pp=std::move(p), &a...]() mutable {
+
+						auto ppp = std::move(pp.get());
+
+						return generator<list<T>,T,void>()
+						(f,
+						 typelist<B...>{},
+						 typelist<decltype(ppp)>{},
+						 typelist<A...>{})(std::forward<B>(b)...,
+										   std::move(ppp),
+										   std::forward<A>(a)...);
+					};
+
+					return std::async(std::launch::async,std::move(lambda));
+				};
+			}
+		};
+	}
+	
 	template<typename F>
 	decltype(auto) make_morphism(F&& f)
 	{
@@ -355,7 +362,8 @@ namespace bejocama
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
 			using MT = typename function_traits<typename clear_type<F>::type>::atype;
 
-			return morphism<IT,OT,RT>()(std::forward<F>(f),typelist<IT>{}, MT{})
+			return functor::generator<IT,OT,RT>()
+				(std::forward<F>(f),typelist<IT>{}, MT{})
 				(std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
 		};
 	}
@@ -377,10 +385,11 @@ namespace bejocama
 			
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
 			
-			return morphism<IT,OT,RT>()(std::forward<F>(f),
-										  BEFORE{},
-										  typelist<IT>{},
-										  AFTER{})(std::forward<decltype(a)>(a)...);
+			return functor::generator<IT,OT,RT>()
+				(std::forward<F>(f),
+				 BEFORE{},
+				 typelist<IT>{},
+				 AFTER{})(std::forward<decltype(a)>(a)...);
 		};
 	}
 }	
