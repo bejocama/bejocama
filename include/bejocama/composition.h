@@ -22,90 +22,98 @@
 
 namespace bejocama
 {
-	template<size_t P,
-			 typename G,
-			 typename F,
-			 typename... REPLACE,
-			 typename... BEFORE,
-			 typename AT,
-			 typename... AFTER>
-	decltype(auto) compose_typed(G&& g, F&& f, tag<typelist<REPLACE...>,
-								 typelist<BEFORE...>, typelist<AT>, typelist<AFTER...>>)
+	namespace hidden
 	{
-		return [gg=std::forward<G>(g),
-				ff=std::forward<F>(f)]
-			(BEFORE&&... before, REPLACE&&... replace, AFTER&&... after) mutable {
-
-			return make_morphism<P>(gg)(std::forward<BEFORE>(before)...,
-									   std::move(ff(std::forward<REPLACE>(replace)...)),
-									   std::forward<AFTER>(after)...);
+		struct recursion
+		{
+			struct yes;
+			struct no;
 		};
-	}
-
-	template<size_t P,
-			 typename G,
-			 typename F,
-			 typename... METHOD,
-			 typename... OBJECT>
-	decltype(auto) compose_object_typed(G&& g, F&& f, tag<typelist<METHOD...>,typelist<OBJECT...>>)
-	{
-		return [g(std::forward<G>(g)),f(std::forward<F>(f))](OBJECT&&... object,
-															 METHOD&&... method) mutable {
-
-			return make_morphism(g)(f(std::forward<OBJECT>(object)...),
-									std::forward<METHOD>(method)...);
-		};
-	}
-	
-	template<typename T, std::size_t P>
-	struct compose_at;
 		
-	template<size_t P>
-	struct compose_at<tag<bool>,P>
-	{
-		template<typename G, typename F>
-		decltype(auto) operator()(G&& g, F&& f)
+		template<size_t P,
+				 typename G,
+				 typename F,
+				 typename... REPLACE,
+				 typename... BEFORE,
+				 typename AT,
+				 typename... AFTER>
+		decltype(auto) compose_indexed(G&& g, F&& f,
+									   typelist<REPLACE...>,
+									   typelist<BEFORE...>,
+									   typelist<AT>,
+									   typelist<AFTER...>)
 		{
-			constexpr auto N = function_traits<typename clear_type<G>::type>::atype::size;
+			return [gg=std::forward<G>(g),
+					ff=std::forward<F>(f)]
+				(BEFORE&&... before, REPLACE&&... replace, AFTER&&... after) mutable {
 
-			using BEFORE = typename function_traits<typename clear_type<G>::type>::template args<0,P>;
-			using AFTER = typename function_traits<typename clear_type<G>::type>::template args<P+1,N-P-1>;
-			using AT = typename function_traits<typename clear_type<G>::type>::template args<P,1>;
-			using REPLACE = typename function_traits<typename clear_type<F>::type>::atype;
-
-			return compose_typed<P>(std::forward<G>(g),
-									std::forward<F>(f),
-									tag<REPLACE,BEFORE,AT,AFTER>{});
+				return make_morphism<P>(gg)(std::forward<BEFORE>(before)...,
+											std::move(ff(std::forward<REPLACE>(replace)...)),
+											std::forward<AFTER>(after)...);
+			};
 		}
-	};
-	
-	template<size_t P>
-	struct compose_at<tag<char>,P>
-	{
-		template<typename G, typename F>
-		decltype(auto) operator()(G&& g, F&& f)
+
+		template<size_t P,
+				 typename G,
+				 typename F,
+				 typename... METHOD,
+				 typename... OBJECT>
+		decltype(auto) compose_object_indexed(G&& g, F&& f, typelist<METHOD...>, typelist<OBJECT...>)
 		{
-			using METHOD = typename function_traits<typename clear_type<G>::type>::atype;
-			using OBJECT = typename function_traits<typename clear_type<F>::type>::atype;
-	
-			return compose_object_typed<P>(std::forward<G>(g),
-										   std::forward<F>(f),
-										   tag<METHOD,OBJECT>{});
+			return [g(std::forward<G>(g)),f(std::forward<F>(f))](OBJECT&&... object,
+																 METHOD&&... method) mutable {
+
+				return make_morphism(g)(f(std::forward<OBJECT>(object)...),
+										std::forward<METHOD>(method)...);
+			};
 		}
-	};
+	
+		template<typename T, std::size_t P>
+		struct compose_at;
+		
+		template<size_t P>
+		struct compose_at<tag<bool>,P>
+		{
+			template<typename G, typename F>
+			decltype(auto) operator()(G&& g, F&& f)
+			{
+				constexpr auto N = function_traits<typename clear_type<G>::type>::atype::size;
 
-	template<size_t P, typename G, typename F>
-	decltype(auto) compose(G&& g, F&& f)
-	{
-		using way = typename std::conditional
-			<is_member_of_return_type<typename clear_type<G>::type,
-									  typename clear_type<F>::type>::value, char, bool>::type;
+				using BEFORE = typename function_traits<typename clear_type<G>::type>::template args<0,P>;
+				using AFTER = typename function_traits<typename clear_type<G>::type>::template args<P+1,N-P-1>;
+				using AT = typename function_traits<typename clear_type<G>::type>::template args<P,1>;
+				using REPLACE = typename function_traits<typename clear_type<F>::type>::atype;
 
-		return compose_at<tag<way>,P>()(std::forward<G>(g), std::forward<F>(f));
-	}
+				return compose_indexed<P>
+					(std::forward<G>(g), std::forward<F>(f), REPLACE{}, BEFORE{}, AT{}, AFTER{});
+			}
+		};
+	
+		template<size_t P>
+		struct compose_at<tag<char>,P>
+		{
+			template<typename G, typename F>
+			decltype(auto) operator()(G&& g, F&& f)
+			{
+				using METHOD = typename function_traits<typename clear_type<G>::type>::atype;
+				using OBJECT = typename function_traits<typename clear_type<F>::type>::atype;
+	
+				return compose_object_indexed<P>(std::forward<G>(g),
+												 std::forward<F>(f),
+												 METHOD{},OBJECT{});
+			}
+		};
 
-	namespace utility
-	{
+		template<size_t P, typename G, typename F>
+		decltype(auto) compose(G&& g, F&& f)
+		{
+			using way = typename std::conditional
+				<is_member_of_return_type<typename clear_type<G>::type,
+										  typename clear_type<F>::type>::value, char, bool>::type;
+
+			return compose_at<tag<way>,P>()(std::forward<G>(g), std::forward<F>(f));
+		}
+
 		template<typename T>
 		struct composer;
 
@@ -118,7 +126,7 @@ namespace bejocama
 				using way = typename std::conditional<(sizeof...(H) > 1), char, bool>::type;
 				
 				return composer<tag<way>>::action
-					(bejocama::compose<0>(std::forward<G>(g), std::forward<F>(f)),std::forward<H>(h)...);
+					(compose<0>(std::forward<G>(g), std::forward<F>(f)),std::forward<H>(h)...);
 			}
 		};
 
@@ -128,29 +136,31 @@ namespace bejocama
 			template<typename F, typename G>
 			static constexpr decltype(auto) action(F&& f, G&& g)
 			{
-				return bejocama::compose<0>(std::forward<G>(g), std::forward<F>(f));
+				return compose<0>(std::forward<G>(g), std::forward<F>(f));
 			}
 		};
 
-		template<typename,std::size_t...>
+		template<typename, std::size_t...>
 		struct curry;
 
 		template<std::size_t P, std::size_t... PP>
-		struct curry<tag<char>,P,PP...>
+		struct curry<recursion::yes,P,PP...>
 		{
 			template<typename F, typename G, typename... GG>
 			static constexpr decltype(auto) action(F&& f, G g, GG... gg)
 			{
-				using way = typename std::conditional<(sizeof...(GG) > 1), char, bool>::type;
+				using way = typename std::conditional<(sizeof...(GG) > 1),
+					recursion::yes,
+					recursion::no>::type;
 				
-				return curry<tag<way>,PP...>::action(compose<P>(std::forward<F>(f),
-																std::forward<G>(g)),
-													 std::forward<GG>(gg)...);
+				return curry<way,PP...>::action(compose<P>(std::forward<F>(f),
+														   std::forward<G>(g)),
+												std::forward<GG>(gg)...);
 			}
 		};
 		
 		template<std::size_t P>
-		struct curry<tag<bool>,P>
+		struct curry<recursion::no,P>
 		{
 			template<typename F, typename G>
 			static constexpr decltype(auto) action(F&& f, G&& g)
@@ -166,15 +176,17 @@ namespace bejocama
 	{
 		using way = typename std::conditional<(sizeof...(F) > 2), char, bool>::type;
 
-		return utility::composer<tag<way>>::action(std::forward<F>(f)...);
+		return hidden::composer<tag<way>>::action(std::forward<F>(f)...);
 	}
 
 	template<std::size_t... P, typename F, typename... G>
 	decltype(auto) curry(F&& f, G&&... g)
 	{
-		using way = typename std::conditional<(sizeof...(G) > 1), char, bool>::type;
+		using way = typename std::conditional<(sizeof...(G) > 1),
+			hidden::recursion::yes,
+			hidden::recursion::no>::type;
 		
-		return utility::curry<tag<way>,P...>::action(std::forward<F>(f),
-													 std::forward<G>(g)...);
+		return hidden::curry<way,P...>::action(std::forward<F>(f),
+											   std::forward<G>(g)...);
 	}
 }
