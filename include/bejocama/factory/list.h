@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "bejocama/provider/list.h"
+#include "bejocama/interface/list.h"
 
 namespace bejocama
 {
@@ -38,13 +38,7 @@ namespace bejocama
 			}
 
 			template<typename U>
-			static bejocama::base::list<T>* create_impl(U&& u, tag<char>)
-			{
-				using TT = typename bejocama::clear_type<T>::type;
-				using UU = typename bejocama::clear_type<U>::type;
-
-				return new list<TT,UU>(std::forward<U>(u));
-			}
+			static bejocama::base::list<T>* create_impl(U&& u, tag<char>);
 
 			template<typename U>
 			static bejocama::base::list<T>* create(U&& u)

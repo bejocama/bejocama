@@ -20,15 +20,15 @@
 #pragma once
 
 #include <string>
-#include "bejocama/provider/string.h"
+#include "bejocama/interface/string.h"
 
 namespace bejocama
 {
 	namespace provider
 	{
-		template<typename>
+		template<typename T>
 		struct factory;
-
+		
 		template<>
 		struct factory<bejocama::base::string>
 		{
@@ -45,12 +45,7 @@ namespace bejocama
 			}
 
 			template<typename U>
-			static bejocama::base::string* create_impl(U&& u, tag<char>)
-			{
-				using UU = typename bejocama::clear_type<U>::type;
-
-				return new string<UU>(std::forward<U>(u));
-			}
+			static bejocama::base::string* create_impl(U&& u, tag<char>);
 
 			template<typename U>
 			static bejocama::base::string* create(U&& u)
@@ -60,7 +55,7 @@ namespace bejocama
 								  bejocama::string>::value,bool,char>::type;
 
 				return create_impl(std::forward<U>(u),tag<way>{});
-			}			
+			}
 		};		
 	}
 }

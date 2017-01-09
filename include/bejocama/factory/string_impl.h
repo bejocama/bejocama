@@ -17,37 +17,22 @@
 
 */
 
-#include "bejocama/composition.h"
-#include "bejocama/functional.h"
-#include "bejocama/iterator.h"
-#include "bejocama/file.h"
-#include "bejocama/provider/file.h"
-#include "bejocama/string.h"
-#include "client.h"
+#pragma once
+
+#include "bejocama/factory/string.h"
+#include "bejocama/provider/string.h"
 
 namespace bejocama
 {
-	template<typename T>
-	void print_file_test2(string fn)
+	namespace provider
 	{
-
-		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
-		
-		auto mkf = make_function<otype>(make_file<T>());
-
-		using t_make_list = list<T>(file<T>::*)();
-
-		t_make_list method = &file<T>::make_list;
-		
-		composer(fopen,
-				 fstat,mmap<T>,
-				 mkf,
-				 std::move(method),
-				 print<T>())(io(fn),0,0);
+		template<typename U>
+		bejocama::base::string* factory<bejocama::base::string>
+		::create_impl(U&& u, tag<char>)
+		{
+			using UU = typename bejocama::clear_type<U>::type;
+			
+			return new string<UU>(std::forward<U>(u));
+		}
 	}
-}
-
-void test2()
-{
-	bejocama::print_file_test2<client>(std::string("client.data"));
 }

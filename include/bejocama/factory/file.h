@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "bejocama/provider/file.h"
+#include "bejocama/interface/file.h"
 
 namespace bejocama
 {
@@ -32,12 +32,7 @@ namespace bejocama
 		struct factory<bejocama::base::file<T>>
 		{
 			template<typename U>
-			static bejocama::base::file<T>* create(U&& u)
-			{
-				using TT = typename bejocama::clear_type<T>::type;
-
-				return new file<TT>(std::forward<U>(u));
-			}
+			static bejocama::base::file<T>* create(U&& u);
 		};
 	}
 }

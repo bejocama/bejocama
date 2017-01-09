@@ -21,6 +21,8 @@
 #include "bejocama/functional.h"
 #include "bejocama/iterator.h"
 #include "bejocama/file.h"
+#include "bejocama/provider/file.h"
+#include "bejocama/string.h"
 #include "client.h"
 
 namespace bejocama

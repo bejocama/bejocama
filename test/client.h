@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 struct client
 {
 	char name[256];
