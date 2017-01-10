@@ -34,25 +34,25 @@ namespace bejocama
 		{
 			using type = std::string;
 			
-			string(std::string&& s) : base::string(), _p(new std::string(std::move(s)))
+			string(std::string&& s) : _p(std::move(s)), base::string()
 			{
 			}
 
-			string(const std::string& s) : base::string(), _p(new std::string(s))
+			string(const std::string& s) : _p(s), base::string()
 			{
 			}
 			
 			const char* c_str() const override
 			{
-				return _p ? _p->c_str() : "";
+				return _p.c_str();
 			}
 
 			base::string* clone() const override
 			{
-				return _p ? new string(*_p) : nullptr;
+				return new string(_p);
 			}
 			
-			maybe<std::string*> _p;
+			std::string _p;
 		};
 	}
 }
