@@ -27,15 +27,15 @@
 #include <unistd.h>
 #include <memory.h>
 #include "bejocama/maybe.h"
-#include "bejocama/string.h"
+#include "bejocama/interface/string.h"
 
 namespace bejocama
 {
 	template<typename T>
 	struct print
 	{
-		void operator()(T&& t)
-		{
+		void operator()(const T& t)
+		{	
 			std::cout << t << std::endl;
 		}
 	};
@@ -52,9 +52,9 @@ namespace bejocama
 	{
 		io() {}
 		
-		io(const string& fn) : _fn(fn) {}
+		io(const string& fn) : _fn(fn->clone()) {}
 
-		io(const io&  i) : _fn(i._fn),
+		io(const io&  i) : _fn(i._fn->clone()),
 						   _fd(i._fd),
 						   _stat(i._stat),
 						   _map(i._map),

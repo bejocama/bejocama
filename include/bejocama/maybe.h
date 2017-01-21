@@ -19,7 +19,8 @@
 
 #pragma once
 #include <stdexcept>
-#include "bejocama/list.h"
+#include <list>
+#include <memory>
 
 namespace bejocama
 {
@@ -36,6 +37,7 @@ namespace bejocama
 
 		maybe(maybe&& m) : _l(std::move(m._l))
 		{
+			m._l.clear();
 		}
 		
 		template<typename U>
@@ -54,7 +56,17 @@ namespace bejocama
 		
 		operator bool() const
 		{
-			return _l->size() == 1;
+			return _l.size() == 1;
+		}
+
+		T* operator->()
+		{
+			return &(_l.front());
+		}
+		
+		const T* operator->() const
+		{
+			return &(_l.front());
 		}
 		
 		T& operator*()
@@ -64,10 +76,10 @@ namespace bejocama
 				throw std::runtime_error("MAYBE: access to nothing requested");
 			}
 
-			return *(_l->begin());
+			return _l.front();
 		}
 
-		list<T> _l;
+		std::list<T> _l;
 	};
 
 	template<typename T>
@@ -92,21 +104,6 @@ namespace bejocama
 
 		~maybe()
 		{
-		}
-
-		T& operator*()
-		{
-			if (!*this) {
-			
-				throw std::runtime_error("MAYBE: access to nothing requested");
-			}
-
-			return *(this->get());
-		}
-
-		const T& operator*() const
-		{
-			return const_cast<maybe<T*>*>(this)->operator*();
 		}
 	};
 }

@@ -130,4 +130,6 @@ namespace bejocama
 		static constexpr bool value = false;
 	};
 
+	template<typename... T>
+	using clear_typelist = typelist<typename clear_type<T>::type...>;
 }

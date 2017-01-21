@@ -19,22 +19,19 @@
 
 #pragma once
 
-#include "bejocama/factory/list.h"
 #include "bejocama/provider/list.h"
 
 namespace bejocama
 {
 	namespace provider
 	{
-		template<typename T>
-		template<typename U>
-		bejocama::base::list<T>* factory<bejocama::base::list<T>>
-		::create_impl(U&& u, tag<char>)
+		template<>
+		template<typename D, typename... U>
+		bejocama::base::list<D>* factory<bejocama::base::list>
+		::create_impl(bejocama::clear_typelist<U...>, U&&... u)
 		{
-			using TT = typename bejocama::clear_type<T>::type;
-			using UU = typename bejocama::clear_type<U>::type;
-
-			return new list<TT,UU>(std::forward<U>(u));
+			return new list<D, typename bejocama::clear_type<U>::type...>
+				(std::forward<U>(u)...);
 		}
 	}
 }

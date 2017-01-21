@@ -16,13 +16,11 @@
   License along with this library.
 
 */
-
 #include "bejocama/composition.h"
-#include "bejocama/functional.h"
-#include "bejocama/iterator.h"
-#include "bejocama/file.h"
-#include "bejocama/provider/file.h"
-#include "bejocama/string.h"
+#include "bejocama/interface/file.h"
+#include "bejocama/interface/list.h"
+#include "bejocama/interface/string.h"
+#include "bejocama/io.h"
 #include "client.h"
 
 namespace bejocama
@@ -30,19 +28,10 @@ namespace bejocama
 	template<typename T>
 	void print_file_test2(string fn)
 	{
-
-		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
-		
-		auto mkf = make_function<otype>(make_file<T>());
-
-		using t_make_list = list<T>(file<T>::*)();
-
-		t_make_list method = &file<T>::make_list;
-		
 		composer(fopen,
 				 fstat,mmap<T>,
-				 mkf,
-				 std::move(method),
+				 make_type<file<T>,io>,
+				 make_type<list<T>,file<T>>,
 				 print<T>())(io(fn),0,0);
 	}
 }

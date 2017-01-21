@@ -19,20 +19,18 @@
 
 #pragma once
 
-#include "bejocama/factory/file.h"
 #include "bejocama/provider/file.h"
 
 namespace bejocama
 {
 	namespace provider
 	{
-		template<typename T>
-		template<typename U>
-		bejocama::base::file<T>* factory<bejocama::base::file<T>>::create(U&& u)
+		template<>
+		template<typename D, typename... U>
+		bejocama::base::file<D>* factory<bejocama::base::file>
+		::create_impl(bejocama::clear_typelist<U...>, U&&... u)
 		{
-			using TT = typename bejocama::clear_type<T>::type;
-
-			return new file<TT>(std::forward<U>(u));
+			return new file<D>(std::move(std::forward<U>(u)...));
 		}
 	}
 }

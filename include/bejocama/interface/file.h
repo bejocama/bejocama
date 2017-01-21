@@ -19,12 +19,17 @@
 
 #pragma once
 
+#include "bejocama/factory.h"
+
 namespace bejocama
 {
-	template<typename> struct maybe;
-	template<typename> struct iterator;
-	template<typename> struct list;
-	template<typename> struct file;
+	namespace base
+	{
+		template<typename> struct file;
+	}
+	
+	template<typename T>
+	using file = type<base::file, T>;
 	
 	namespace base
 	{
@@ -43,7 +48,7 @@ namespace bejocama
 
 			virtual T* end() const  = 0;
 
-			virtual maybe<bejocama::file<T>> add(T&&) = 0;
+			virtual bejocama::file<T> add(const T&) = 0;
 		};
 	}
 }

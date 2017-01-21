@@ -26,33 +26,33 @@ namespace bejocama
 {
 	namespace provider
 	{
-		template<typename P>
+		template<typename P, typename D>
 		struct string;
-
-		template<>
-		struct string<std::string> : base::string
+		
+		template<typename D>
+		struct string<std::basic_string<D>,D> : base::string<D>
 		{
-			using type = std::string;
+			using type = std::basic_string<D>;
 			
-			string(std::string&& s) : _p(std::move(s)), base::string()
+			string(std::basic_string<D>&& s) : _p(std::move(s)), base::string<D>()
 			{
 			}
 
-			string(const std::string& s) : _p(s), base::string()
+			string(const std::basic_string<D>& s) : _p(s), base::string<D>()
 			{
 			}
 			
-			const char* c_str() const override
+			const D* c_str() const override
 			{
 				return _p.c_str();
 			}
 
-			base::string* clone() const override
+			bejocama::basic_string<D> clone() const override
 			{
-				return new string(_p);
+				return bejocama::basic_string<D>(_p);
 			}
 			
-			std::string _p;
+			std::basic_string<D> _p;
 		};
 	}
 }

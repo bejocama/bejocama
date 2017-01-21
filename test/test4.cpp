@@ -18,11 +18,10 @@
 */
 
 #include "bejocama/composition.h"
-#include "bejocama/functional.h"
-#include "bejocama/iterator.h"
-#include "bejocama/file.h"
-#include "bejocama/provider/file.h"
-#include "bejocama/string.h"
+#include "bejocama/interface/file.h"
+#include "bejocama/interface/list.h"
+#include "bejocama/interface/string.h"
+#include "bejocama/io.h"
 #include "client.h"
 
 namespace bejocama
@@ -31,28 +30,20 @@ namespace bejocama
 	template<typename T>
 	void add_and_print_file(string fn, T&& t)
 	{
-		using t_list = list<T>(file<T>::*)();
-		using t_plus = list<T>(list<T>::*)(T&& t);
+		using t_plus = list<T>(list<T>::interface::*)(const T& t);
 
-		t_list m_list = &file<T>::make_list;
-		t_plus m_plus = &list<T>::operator+;
+		t_plus m_plus = &list<T>::interface::add;
 
 		auto xopen = curry<0>(fopen,returns(io(fn)));
 
 		auto xmap = curry<1,1>(mmap<T>,
 							   returns((long int)0),
 							   returns((unsigned long int)0));
-
-		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
-		
-		auto mkf = make_function<otype>(make_file<T>());
-
-
 		composer(xopen,
 				 fstat,
 				 xmap,
-				 mkf,
-				 m_list,
+				 make_type<file<T>,io>,
+				 make_type<list<T>,file<T>>,
 				 m_plus,
 				 print<T>())(std::move(t));
 	}

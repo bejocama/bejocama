@@ -16,13 +16,12 @@
   License along with this library.
 
 */
-
 #include "bejocama/composition.h"
-#include "bejocama/iterator.h"
-#include "bejocama/file.h"
+#include "bejocama/interface/file.h"
+#include "bejocama/interface/list.h"
 #include "client.h"
 
 void test3()
 {
-	 auto ll = bejocama::list<client>() + client{"tom", "orlando", .age=20,.height=178};
+	auto ll = bejocama::list<client>()->add(client{"tom", "orlando", .age=20,.height=178});
 }

@@ -23,24 +23,21 @@
 
 namespace bejocama
 {
-	template<typename> struct file;
-	
 	namespace provider
 	{
-		template<typename T> struct iterator;
+		template<typename> struct iterator;
 		
 		template<template<typename...> class C, typename T, typename... TT>
 		struct iterator<C<T,TT...>> : bejocama::base::iterator<T>
 		{
 			using type = iterator<C<T,TT...>>;
 			
-			iterator(const typename C<T,TT...>::iterator& i,
-					 const typename C<T,TT...>::iterator& b,
-					 const typename C<T,TT...>::iterator& e) : _i(i), _b(b), _e(e)
+			iterator(C<T,TT...>& c, typename C<T,TT...>::iterator i) :
+				_c(c), _i(i)
 			{
 			}
 
-			iterator(const iterator& it) : _i(it._i), _b(it._b), _e(it._e)
+			iterator(const iterator& it) : _c(it._c), _i(it._i)
 			{
 			}
 
@@ -49,51 +46,50 @@ namespace bejocama
 				return new type(*this);
 			}
 
-			bejocama::iterator<T> operator++() override
+			bejocama::iterator<T> preinc() override
 			{
 				*this && ++_i;
 
-				return new type(*this);
+				return bejocama::iterator<T>(_c,_i);
 			}
 
-			bejocama::iterator<T> operator++(int) override
+			bejocama::iterator<T> postinc() override
 			{
-				auto it = new type(*this);
+				auto ii = _i;
 
 				*this && ++_i;
 
-				return it;
+				return bejocama::iterator<T>(_c,ii);
 			}
 			
-			bejocama::iterator<T> operator--() override
+			bejocama::iterator<T> predec() override
 			{
-				(_i != _b) && --_i || (_i = _e);
+				(_i != _c.begin()) && --_i || (_i = _c.end());
 
-				return new type(*this);
+				return bejocama::iterator<T>(_c,_i);
 			}
 
-			bejocama::iterator<T> operator--(int) override
+			bejocama::iterator<T> postdec() override
 			{
-				auto it = new type(*this);
+				auto ii = _i;
 
 				*this && --_i;
 				
-				return it;
+				return bejocama::iterator<T>(_c,ii);
 			}
 			
-			T& operator*() override
+			T& get() override
 			{
 				return *_i;
 			}
 
 			operator bool() const
 			{
-				return (_i != _e);
+				return (_i != _c.end());
 			}
 			
+			C<T,TT...>& _c;
 			typename C<T,TT...>::iterator _i;
-			typename C<T,TT...>::iterator _b;
-			typename C<T,TT...>::iterator _e;
 		};
 		
 		template<typename T>
@@ -101,11 +97,11 @@ namespace bejocama
 		{
 			using type = iterator<bejocama::file<T>>;
 			
-			iterator(T* i, T* b, T* e) : _i(i), _b(b), _e(e)
+			iterator(bejocama::file<T>& f, T* i) : _f(f), _i(i)
 			{
 			}
 
-			iterator(const iterator& it) : _i(it._i), _b(it._b), _e(it._e)
+			iterator(const iterator& it) : _f(it._f), _i(it._i)
 			{
 			}
 
@@ -114,51 +110,50 @@ namespace bejocama
 				return new type(*this);
 			}
 			
-			bejocama::iterator<T> operator++() override
+			bejocama::iterator<T> preinc() override
 			{				
 				*this && ++_i;
 
-				return new type(*this);
+				return bejocama::iterator<T>(_f,_i);
 			}
 
-			bejocama::iterator<T> operator++(int) override
+			bejocama::iterator<T> postinc() override
 			{
-				auto it = new type(*this);
+				auto ii = _i;
 
 				*this && ++_i;
 
-				return it;
+				return bejocama::iterator<T>(_f,ii);
 			}
 
-			bejocama::iterator<T> operator--() override
+			bejocama::iterator<T> predec() override
 			{
-				_i != _b && --_i || (_i = _e);
+				_i != _f->begin() && --_i || (_i = _f->end());
 
-				return new type(*this);
+				return bejocama::iterator<T>(_f,_i);
 			}
 
-			bejocama::iterator<T> operator--(int) override
+			bejocama::iterator<T> postdec() override
 			{
-				auto it = new type(*this);
+				auto ii = _i;
 
 				*this && --_i;
 
-				return it;
+				return bejocama::iterator<T>(_f,ii);
 			}
 			
-			T& operator*() override
+			T& get() override
 			{
 				return *_i;
 			}
 
 			operator bool() const
 			{
-				return (_i != _e);
+				return (_i != _f->end());
 			}
 			
+			bejocama::file<T>& _f;
 			T* _i;
-			T* _b;
-			T* _e;
 		};		
 	}
 }

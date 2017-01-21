@@ -19,20 +19,18 @@
 
 #pragma once
 
-#include "bejocama/factory/string.h"
 #include "bejocama/provider/string.h"
 
 namespace bejocama
 {
 	namespace provider
 	{
-		template<typename U>
-		bejocama::base::string* factory<bejocama::base::string>
-		::create_impl(U&& u, tag<char>)
+		template<>
+		template<typename D, typename... U>
+		bejocama::base::string<D>* factory<bejocama::base::string>
+		::create_impl(bejocama::clear_typelist<U...>, U&&... u)
 		{
-			using UU = typename bejocama::clear_type<U>::type;
-			
-			return new string<UU>(std::forward<U>(u));
+			return new string<typename bejocama::clear_type<U>::type..., D>(std::forward<U>(u)...);
 		}
 	}
 }

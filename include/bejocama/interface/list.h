@@ -19,11 +19,19 @@
 
 #pragma once
 
+#include "bejocama/factory.h"
+#include "bejocama/interface/iterator.h"
+
 namespace bejocama
 {
-	template<typename> struct iterator;
-	template<typename> struct list;
+	namespace base
+	{
+		template<typename> struct list;
+	}
 	
+	template<typename T>
+	using list = type<base::list, T>;
+
 	namespace base
 	{
 		template<typename T>
@@ -33,7 +41,7 @@ namespace bejocama
 			virtual std::size_t size() const = 0;
 			virtual bejocama::iterator<T> begin() = 0;
 			virtual bejocama::iterator<T> end() = 0;
-			virtual bejocama::list<T> add(T&& t) = 0;
+			virtual bejocama::list<T> add(const T& t) = 0;
 		};
 	}
 }

@@ -18,12 +18,13 @@
 */
 
 #pragma once
+#include <utility>
 #include <type_traits>
 #include "bejocama/typelist.h"
 #include "bejocama/utility.h"
 
 namespace bejocama
-{
+{	
 	template<typename F>
 	struct function_traits
 	{

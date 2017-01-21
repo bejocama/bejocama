@@ -19,17 +19,27 @@
 
 #pragma once
 
+#include "bejocama/factory.h"
+
 namespace bejocama
 {
-	struct string;
+	namespace base
+	{
+		template<typename> struct string;
+	}
+
+	template<typename D>
+	using basic_string = type<base::string, D>;
+
+	using string = basic_string<char>;
 	
 	namespace base
 	{
+		template<typename T>
 		struct string
 		{
-			virtual const char* c_str() const = 0;
-			virtual base::string* clone() const = 0;
+			virtual const T* c_str() const = 0;
+			virtual bejocama::basic_string<T> clone() const = 0;
 		};
-		
 	}
 }

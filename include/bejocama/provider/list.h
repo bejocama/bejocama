@@ -20,56 +20,54 @@
 #pragma once
 
 #include "bejocama/interface/list.h"
+#include "bejocama/interface/file.h"
+#include "bejocama/interface/iterator.h"
 
 namespace bejocama
 {
-	template<typename> struct file;
-	template<typename> struct maybe;
-	
 	namespace provider
 	{
-		template<typename> struct iterator;
-		
 		template<typename T, typename P>
 		struct list : bejocama::base::list<T>
 		{
 			template<typename... A>
-			list(A&&... a) : _p(new P(std::forward<A>(a)...)),
+			list(A&&... a) : _p(std::forward<A>(a)...),
 							 bejocama::base::list<T>()
 			{
-				static_assert(!std::is_same<bejocama::list<T>,P>::value,"bejocama::list may not be a provider");
+				static_assert(!std::is_same<bejocama::list<T>,P>::value,
+							  "bejocama::list may not be a provider");
 			}
 
 			std::size_t size() const override
 			{
-				return _p->size();
+				return _p.size();
 			}
 
 			bejocama::iterator<T> begin() override
 			{
-				return new iterator<P>(_p->begin(), _p->begin(), _p->end());
+				return bejocama::iterator<T>(_p, _p.begin());
 			}
 
 			bejocama::iterator<T> end() override
 			{
-				return new iterator<P>(_p->end(), _p->end(), _p->end());
+				return bejocama::iterator<T>(_p, _p.end());
 			}
 
-			bejocama::list<T> add(T&& t) override
+			bejocama::list<T> add(const T& t) override
 			{
-				_p->push_back(std::move(t));
+				_p.push_back(std::move(t));
 
-				return std::move(*_p.release());
+				return std::move(_p);
 			}
 			
-			maybe<P*> _p;
+			P _p;
 		};
 
 		template<typename T>
 		struct list<T,bejocama::file<T>> : bejocama::base::list<T>
 		{
 			template<typename... A>
-				list(A&&... a) : _p(std::forward<A>(a)...), bejocama::base::list<T>()
+			list(A&&... a) : _p(std::forward<A>(a)...), bejocama::base::list<T>()
 			{
 			}
 
@@ -84,21 +82,17 @@ namespace bejocama
 
 			bejocama::iterator<T> begin() override
 			{
-				return new iterator<bejocama::file<T>>(_p->begin(), _p->begin(), _p->end());
+				return bejocama::iterator<T>(_p, _p->begin());
 			}
 
 			bejocama::iterator<T> end() override
 			{
-				return new iterator<bejocama::file<T>>(_p->end(), _p->end(), _p->end());
+				return bejocama::iterator<T>(_p, _p->end());
 			}
 
-			bejocama::list<T> add(T&& t) override
+			bejocama::list<T> add(const T& t) override
 			{
-				auto f = _p->add(std::move(t));
-
-				!f && make_throw_true(std::runtime_error("ERROR: cannot add to list"));
-
-				return std::move(*f);
+				return std::move(_p->add(std::move(t)));
 			}
 			
 			bejocama::file<T> _p;

@@ -19,21 +19,28 @@
 
 #pragma once
 
+#include "bejocama/factory.h"
+
 namespace bejocama
 {
-	template<typename> struct iterator;
+	namespace base
+	{
+		template<typename> struct iterator;
+	}
 	
+	template<typename T>
+	using iterator = type<base::iterator, T>;
+
 	namespace base
 	{
 		template<typename T>
 		struct iterator
 		{
-			virtual T& operator*() = 0;
-
-			virtual bejocama::iterator<T> operator++() = 0;
-			virtual bejocama::iterator<T> operator++(int) = 0;
-			virtual bejocama::iterator<T> operator--() = 0;
-			virtual bejocama::iterator<T> operator--(int) = 0;
+			virtual bejocama::iterator<T> preinc() = 0;
+			virtual bejocama::iterator<T> postinc() = 0;
+			virtual bejocama::iterator<T> predec() = 0;
+			virtual bejocama::iterator<T> postdec() = 0;
+			virtual T& get() = 0;
 			virtual operator bool() const = 0;
 			virtual iterator<T>* clone() = 0;
 		};		

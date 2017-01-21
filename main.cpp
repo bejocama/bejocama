@@ -17,14 +17,19 @@
 
 */
 
+//interfaces
 #include "bejocama/composition.h"
-#include "bejocama/functional.h"
-#include "bejocama/iterator.h"
-#include "bejocama/file.h"
-#include "bejocama/factory/string_impl.h"
-#include "bejocama/factory/file_impl.h"
-#include "bejocama/factory/list_impl.h"
+#include "bejocama/interface/file.h"
+#include "bejocama/interface/list.h"
+#include "bejocama/interface/string.h"
+#include "bejocama/io.h"
 #include "client.h"
+
+//implementations
+#include "bejocama/factory/string_impl.h"
+#include "bejocama/factory/list_impl.h"
+#include "bejocama/factory/file_impl.h"
+#include "bejocama/factory/iterator_impl.h"
 
 namespace bejocama
 {
@@ -32,16 +37,7 @@ namespace bejocama
 	template<typename T>
 	void add_and_print_file(string fn, T&& t)
 	{		
-		/*
-
-		  using helper in the case of overloaded function
-		  operators
-
-		*/
 		
-		using otype = maybe<file<T>>(make_file<T>::*)(io&&);
-		auto mkf = make_function<otype>(make_file<T>());
-
 		/*
 		  In situations where an identifier of a method isn't
 		  unique, the specific type of the method is needed.
@@ -49,14 +45,12 @@ namespace bejocama
 		  Together with the method type, the address operator
 		  provides the right address of the method.
 		*/
-		
-		auto m_list = static_cast<list<T>(file<T>::*)()>
-			(&file<T>::make_list);
-		
-		auto m_plus = static_cast<list<T>(list<T>::*)(T&& t)>
-			(&list<T>::operator+);
 
+		using t_plus = list<T>(list<T>::interface::*)(const T& t);
 
+		t_plus m_plus = &list<T>::interface::add;
+
+		
 		/*
 		  Test of the curry function.
 		*/
@@ -80,38 +74,37 @@ namespace bejocama
           that future to a following thread, which executes another 
           composition.
 		*/
-		
+
 		auto result_assoc = composer(xopen,
 									 composer(fstat,
 											  xmap,
-											  mkf,
-											  m_list,
+											  make_type<file<T>,io>,
+											  make_type<list<T>,file<T>>,
 											  m_plus,
 											  print<T>()))(T(t));
-		
+
 		/*
 		  Starting with the thread function xopen, all following steps
 		  are running in a separate thread. All result futures are moved
 		  to the subsequent thread.
 		*/
-		
+
 		auto result_every = composer(xopen,
 									 fstat,
 									 xmap,
-									 mkf,
-									 m_list,
+									 make_type<file<T>,io>,
+									 make_type<list<T>,file<T>>,
 									 m_plus,
 									 print<T>())(T(t));
-
 
 		/*
 		  The result of all compositions is a future.
 		*/
-		
+
 		result_assoc.get();
 
 		result_every.get();
-
+		
 		/*
 		  The serial composition differs from parallel by a
 		  functional transformation.
@@ -120,13 +113,14 @@ namespace bejocama
 		auto result_serial = composer(curry<0>(fopen,returns(io(fn))),
 									  fstat,
 									  xmap,
-									  mkf,
-									  m_list,
+									  make_type<file<T>,io&&>,
+									  make_type<list<T>,file<T>>,
 									  m_plus,
 									  print<T>())(T(t));
 
 		static_assert(std::is_same<decltype(result_assoc.get()),decltype(result_serial)>::value,
 					  "ERROR: types must be equal");
+
 	}
 
 	void test()
@@ -136,7 +130,7 @@ namespace bejocama
 
 		auto l = std::list<client>{client{"tom", "orlando", .age=20,.height=178}};
 
-		curry<1>(add_and_print_file<client>,returns(list<client>(l)))(std::string("client.data"));
+		//curry<1>(add_and_print_file<client>,returns(list<client>(l)))(std::string("client.data"));
 	}
 }
 

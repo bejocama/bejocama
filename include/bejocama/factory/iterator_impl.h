@@ -18,53 +18,21 @@
 */
 
 #pragma once
-#include <memory>
+
 #include "bejocama/provider/iterator.h"
-#include "bejocama/maybe.h"
 
 namespace bejocama
 {
-	template<typename T>
-	struct iterator : maybe<base::iterator<T>*>
+	namespace provider
 	{
-		iterator(const iterator& it)
-			: maybe<base::iterator<T>*>(it->clone())
+		template<>
+		template<typename D, typename... U>
+		bejocama::base::iterator<D>* factory<bejocama::base::iterator>
+		::create_impl(bejocama::clear_typelist<U...>, U&&... u)
 		{
+			using C = typename bejocama::clear_typelist<U...>::first;
+			
+			return new iterator<C>(std::forward<U>(u)...);
 		}
-
-		iterator(base::iterator<T>* i)
-			: maybe<base::iterator<T>*>(i)
-		{
-		}
-
-		operator bool()
-		{
-			return *(this->get());
-		}
-		
-		T& operator*()
-		{
-			return **(this->get());
-		}
-
-		iterator<T> operator++()
-		{
-			return ++(*(this->get()));
-		}
-
-		iterator<T> operator++(int)
-		{
-			return (*(this->get()))++;
-		}		
-
-		iterator<T> operator--()
-		{
-			return --(*(this->get()));
-		}
-
-		iterator<T> operator--(int)
-		{
-			return (*(this->get()))--;
-		}		
-	};
+	}
 }
