@@ -24,13 +24,13 @@ the close connection between the terms "code sequencing" and
 Status
 ------
 
- * functors, make_morphism (fmap) are the base of compositions
+ * functors, fmap, make_type, are the base of compositions
  * a compose function that composes at any argument position
  * a variadic composer which composes at position 0
  * a curry functions that is variadic over positions
  * basic examples of a new typesystem
- * support for continuations
- * make_function for overloaded function operators
+ * types as generated frontend values of interfaces
+ * support for continuations - composition of functions that return a future
 
 Because this approach is composition oriented, restrictions are
 not expected from the theoretical side - if any - not approved yet.
@@ -56,7 +56,7 @@ maybe<bool> composer(fopen,make_file<T>,&file<T>::make_list,print<T>)
 ```
 
 This way the motivation for a functional solution is derived from a coding
-problem inside the C++ language. 
+problem inside the c++ language. 
 
 These two introductory c-file-function examples may show, that the use of
 the *composer* function can be simple in use, without knowing anything
@@ -73,15 +73,24 @@ in haskell:
 data list :: std::list  | std::map | bejocama::file
 ```
 
-The interpretation for C++ is
+The interpretation for c++ is
 
 > *list* is a *primary type* whereas the right side consists of
 > *secondary types* or *internal types*.
 
-Next plans are to extend the list operations and the list of list-providers
-and a first implementation of continuations. To get a better feeling how powerful
-this approach is, a database for filesystem, memory and shared memory use,
-may be a playground.
+The power of such a library is related to some theoretical background, which
+must also be developed. These development activities can be found at my homepage
+
+> <http://www.bejocama.de>
+
+At the moment the main finding in this area can be expressed by the term
+*return type category*, which helps to characterize any function to be *pure*
+or anything else. Such a charaterization is programming language independent. 
+Return types decide how to combine functions/operations and that's the power of
+this point of view if we use this information to generate the combining code. 
+
+More precisly, the function combinantion shouldn't be a result of an accident.
+The result should not depend on the work of a destinct programmer.
 
 
 Introduction
