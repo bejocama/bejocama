@@ -46,14 +46,14 @@ namespace bejocama
 				return new type(*this);
 			}
 
-			bejocama::iterator<T> preinc() override
+			bejocama::iterator<T> operator++() override
 			{
 				*this && ++_i;
 
 				return bejocama::iterator<T>(_c,_i);
 			}
 
-			bejocama::iterator<T> postinc() override
+			bejocama::iterator<T> operator++(int) override
 			{
 				auto ii = _i;
 
@@ -62,14 +62,14 @@ namespace bejocama
 				return bejocama::iterator<T>(_c,ii);
 			}
 			
-			bejocama::iterator<T> predec() override
+			bejocama::iterator<T> operator--() override
 			{
 				(_i != _c.begin()) && --_i || (_i = _c.end());
 
 				return bejocama::iterator<T>(_c,_i);
 			}
 
-			bejocama::iterator<T> postdec() override
+			bejocama::iterator<T> operator--(int) override
 			{
 				auto ii = _i;
 
@@ -110,14 +110,14 @@ namespace bejocama
 				return new type(*this);
 			}
 			
-			bejocama::iterator<T> preinc() override
+			bejocama::iterator<T> operator++() override
 			{				
 				at_end() || ++_i;
 
 				return bejocama::iterator<T>(_f,_i);
 			}
 
-			bejocama::iterator<T> postinc() override
+			bejocama::iterator<T> operator++(int) override
 			{
 				auto ii = _i;
 
@@ -126,14 +126,14 @@ namespace bejocama
 				return bejocama::iterator<T>(_f,ii);
 			}
 
-			bejocama::iterator<T> predec() override
+			bejocama::iterator<T> operator--() override
 			{
 				_i != _f->begin() && --_i || (_i = _f->end());
 
 				return bejocama::iterator<T>(_f,_i);
 			}
 
-			bejocama::iterator<T> postdec() override
+			bejocama::iterator<T> operator--(int) override
 			{
 				auto ii = _i;
 

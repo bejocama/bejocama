@@ -108,7 +108,7 @@ namespace bejocama
 					while(!it->at_end()) {
 
 						ff(std::forward<decltype(b)>(b)...,
-						   it->postinc()->get(),
+						   it++->get(),
 						   std::forward<decltype(a)>(a)...);
 					}
 					

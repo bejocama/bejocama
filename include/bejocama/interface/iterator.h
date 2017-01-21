@@ -36,10 +36,10 @@ namespace bejocama
 		template<typename T>
 		struct iterator
 		{
-			virtual bejocama::iterator<T> preinc() = 0;
-			virtual bejocama::iterator<T> postinc() = 0;
-			virtual bejocama::iterator<T> predec() = 0;
-			virtual bejocama::iterator<T> postdec() = 0;
+			virtual bejocama::iterator<T> operator++() = 0;
+			virtual bejocama::iterator<T> operator++(int) = 0;
+			virtual bejocama::iterator<T> operator--() = 0;
+			virtual bejocama::iterator<T> operator--(int) = 0;
 			virtual T& get() = 0;
 			virtual bool at_end() const = 0;
 			virtual iterator<T>* clone() = 0;

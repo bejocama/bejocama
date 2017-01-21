@@ -58,6 +58,11 @@ namespace bejocama
 		type(const type&) = delete;
 
 		type() {}
+
+		type operator++() { return this->get()->operator++(); }
+		type operator++(int) { return this->get()->operator++(0); }
+		type operator--() { return this->get()->operator--(); }
+		type operator--(int) { return this->get()->operator--(0); }		
 	};
 
 	template<typename T, typename... A>
