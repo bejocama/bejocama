@@ -105,7 +105,7 @@ namespace bejocama
 
 					auto it = p->begin();
 
-					while(it->operator bool()) {
+					while(!it->at_end()) {
 
 						ff(std::forward<decltype(b)>(b)...,
 						   it->postinc()->get(),

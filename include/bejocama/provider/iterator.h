@@ -83,9 +83,9 @@ namespace bejocama
 				return *_i;
 			}
 
-			operator bool() const
+			bool at_end() const override
 			{
-				return (_i != _c.end());
+				return (_i == _c.end()) && (_i == _c.rend());
 			}
 			
 			C<T,TT...>& _c;
@@ -112,7 +112,7 @@ namespace bejocama
 			
 			bejocama::iterator<T> preinc() override
 			{				
-				*this && ++_i;
+				at_end() || ++_i;
 
 				return bejocama::iterator<T>(_f,_i);
 			}
@@ -121,7 +121,7 @@ namespace bejocama
 			{
 				auto ii = _i;
 
-				*this && ++_i;
+				at_end() || ++_i;
 
 				return bejocama::iterator<T>(_f,ii);
 			}
@@ -137,7 +137,7 @@ namespace bejocama
 			{
 				auto ii = _i;
 
-				*this && --_i;
+				at_end() || --_i;
 
 				return bejocama::iterator<T>(_f,ii);
 			}
@@ -147,9 +147,9 @@ namespace bejocama
 				return *_i;
 			}
 
-			operator bool() const
+			bool at_end() const override
 			{
-				return (_i != _f->end());
+				return (_i == _f->end()) || (_i == _f->rend());
 			}
 			
 			bejocama::file<T>& _f;

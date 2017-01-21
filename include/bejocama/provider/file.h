@@ -56,6 +56,16 @@ namespace bejocama
 				return reinterpret_cast<T*>(_io->_map.start + _io->_map.poff + _io->_map.len);
 			}
 
+			T* rend() const override
+			{
+				return begin() - 1;
+			}
+
+			T* rbegin() const override
+			{
+				return end() - 1;
+			}
+			
 			bejocama::file<T> add(const T& t) override
 			{
 				return composer

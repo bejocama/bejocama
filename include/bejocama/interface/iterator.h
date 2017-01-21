@@ -41,7 +41,7 @@ namespace bejocama
 			virtual bejocama::iterator<T> predec() = 0;
 			virtual bejocama::iterator<T> postdec() = 0;
 			virtual T& get() = 0;
-			virtual operator bool() const = 0;
+			virtual bool at_end() const = 0;
 			virtual iterator<T>* clone() = 0;
 		};		
 	}

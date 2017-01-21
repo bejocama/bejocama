@@ -48,6 +48,10 @@ namespace bejocama
 
 			virtual T* end() const  = 0;
 
+			virtual T* rbegin() const = 0;
+
+			virtual T* rend() const  = 0;
+			
 			virtual bejocama::file<T> add(const T&) = 0;
 		};
 	}

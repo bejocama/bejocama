@@ -41,6 +41,8 @@ namespace bejocama
 			virtual std::size_t size() const = 0;
 			virtual bejocama::iterator<T> begin() = 0;
 			virtual bejocama::iterator<T> end() = 0;
+			virtual bejocama::iterator<T> rbegin() = 0;
+			virtual bejocama::iterator<T> rend() = 0;
 			virtual bejocama::list<T> add(const T& t) = 0;
 		};
 	}

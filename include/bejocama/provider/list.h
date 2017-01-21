@@ -53,6 +53,16 @@ namespace bejocama
 				return bejocama::iterator<T>(_p, _p.end());
 			}
 
+			bejocama::iterator<T> rbegin() override
+			{
+				return bejocama::iterator<T>(_p, _p.rbegin());
+			}
+
+			bejocama::iterator<T> rend() override
+			{
+				return bejocama::iterator<T>(_p, _p.rend());
+			}
+			
 			bejocama::list<T> add(const T& t) override
 			{
 				_p.push_back(std::move(t));
@@ -90,6 +100,16 @@ namespace bejocama
 				return bejocama::iterator<T>(_p, _p->end());
 			}
 
+			bejocama::iterator<T> rbegin() override
+			{
+				return bejocama::iterator<T>(_p, _p->rbegin());
+			}
+
+			bejocama::iterator<T> rend() override
+			{
+				return bejocama::iterator<T>(_p, _p->rend());
+			}
+			
 			bejocama::list<T> add(const T& t) override
 			{
 				return std::move(_p->add(std::move(t)));
