@@ -132,4 +132,10 @@ namespace bejocama
 
 	template<typename... T>
 	using clear_typelist = typelist<typename clear_type<T>::type...>;
+
+	template<std::size_t P, typename... T>
+	struct tl_extract
+	{
+		using type = typelist<typename tl_get<T,P>::type...>;
+	};
 }

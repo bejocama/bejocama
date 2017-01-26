@@ -23,6 +23,7 @@
 #include "bejocama/interface/list.h"
 #include "bejocama/interface/string.h"
 #include "bejocama/io.h"
+#include "bejocama/db/db.h"
 #include "client.h"
 
 //implementations
@@ -31,8 +32,50 @@
 #include "bejocama/factory/file_impl.h"
 #include "bejocama/factory/iterator_impl.h"
 
+namespace application
+{
+	struct database
+	{
+		struct column_id
+		{
+			using type = unsigned;
+			static constexpr const char* name = "id";
+		};
+
+		struct column_name
+		{
+			using type = char[40];
+			static constexpr const char* name = "name";
+		};
+
+		struct column_city
+		{
+			using type = char[40];
+			static constexpr const char* name = "city";
+		};
+
+		struct person : bejocama::db::table<
+			column_id,
+			column_name,
+			column_city
+			>
+		{
+			static constexpr const char* name = "person";
+		};
+	};
+}
+
 namespace bejocama
 {
+
+	void dbtest(std::istream& is, std::ostream& os)
+	{
+		application::database::person::row r;
+
+		r.io(is);
+
+		r.io(os);
+	}
 
 	template<typename T>
 	void add_and_print_file(string fn, T&& t)
@@ -141,6 +184,6 @@ namespace bejocama
 int main(int argc, char** argv)
 {
 	bejocama::test();
-	
+
 	return 0;
 }
