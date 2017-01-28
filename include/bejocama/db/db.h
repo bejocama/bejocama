@@ -1,76 +1,109 @@
 #pragma once
 
+#include "bejocama/interface/list.h"
+
 namespace bejocama
 {
 	namespace db
 	{
-		template<typename U, typename S, typename T = S>
-		struct tuple_pos;
-
-		template<typename U, typename... S, typename... T>
-		struct tuple_pos<U, typelist<S...>, typelist<T...>>
+		template<typename N>
+		struct numeric_column
 		{
-			static constexpr unsigned value =
-				std::is_same<U,typename typelist<T...>::first>::value ? sizeof...(S) - sizeof...(T)
-				: tuple_pos<U, typelist<S...>, typename typelist<T...>::tail>::value;
-		};
+			using type = N;
 
-		template<typename U, typename... S>
-		struct tuple_pos<U, typelist<S...>, typelist<>>
-		{
-			static constexpr unsigned value = 9999;
-		};
-
-		template<typename... T>
-		struct make_tuple;
-
-		template<typename... T>
-		struct make_tuple<typelist<T...>>
-		{
-			using type = std::tuple<T...>;
-		};
-
-		template<typename D>
-		bool stream(std::ostream& os, D&& d)
-		{
-			return (os << std::forward<D>(d));
-		}
-
-		template<typename D>
-		bool stream(std::istream& is, D&& d)
-		{
-			return (is >> std::forward<D>(d));
-		}
-		
-		template<typename... T>
-		struct table
-		{
-			static constexpr unsigned columns = sizeof...(T);
-			
-			using column_types = typelist<T...>;
-
-			struct row : make_tuple<typelist<typename T::type...>>::type
+			static void Set(N& n, N n_new)
 			{
-				template<typename U>
-				decltype(auto) get()
-				{
-					return std::get<tuple_pos<U,typename table::column_types>::value>(*this);
-				}
-
-				template<typename S, std::size_t P = 0>
-				bool io(S& s, typelist<bool> = {})
-				{
-					using type = typename std::conditional<(P+1<table::columns),bool,char>::type;
-				
-					return stream(s,std::get<P>(*this)) ? io<S,P+1>(s,typelist<type>{}) : false;
-				}
-
-				template<typename S, std::size_t P>
-				bool io(S& s, typelist<char>)
-				{
-					return true;
-				}
-			};
+				n = n_new;
+			}
 		};
+
+		template<unsigned N>
+		struct string_column
+		{
+			using type = char[N];
+
+			static void Set(char (&c)[N], const char* c_new)
+			{
+				strncpy(c,c_new,N);
+			}
+		};
+
+		template<typename... T>
+		struct container : std::tuple<typename T::type...>
+		{
+			using columns = typelist<T...>;
+			
+			template<typename U>
+			decltype(auto) get()
+			{
+				return std::get<type_index<U,columns>::value>(*this);
+			}
+		};
+
+		template<typename... T>
+		struct row : container<T...>
+		{
+			template<typename U, typename V>
+			void set(V&& v)
+			{
+				U::Set(this->template get<U>(),v);
+			}
+			
+			template<typename D>
+			bool stream(std::ostream& os, D&& d)
+			{
+				return (os << std::forward<D>(d));
+			}
+
+			template<typename D>
+			bool stream(std::istream& is, D&& d)
+			{
+				return (is >> std::forward<D>(d));
+			}
+			
+			template<typename S, std::size_t P = 0>
+			bool io(S& s, typelist<bool> = {})
+			{
+				using type = typename std::conditional<(P+1<sizeof...(T)),bool,char>::type;
+				
+				return stream(s,std::get<P>(*this)) ? io<S,P+1>(s,typelist<type>{}) : false;
+			}
+
+			template<typename S, std::size_t P>
+			bool io(S& s, typelist<char>)
+			{
+				return true;
+			}
+		};
+
+		template<typename... T>
+		struct table : bejocama::list<row<T...>>
+		{
+			using row = bejocama::db::row<T...>;
+		};		
 	}
+}
+
+template<typename R, typename S = typename std::decay<R>::type,
+		 typename = typename std::enable_if
+		 <bejocama::is_base_of<bejocama::db::row,S>::value,int>::type>
+std::ostream& operator<<(std::ostream& os, R&& r)
+{
+	return r.io(os) ? os : os;
+}
+
+template<typename R, typename S = typename std::decay<R>::type,
+		 typename = typename std::enable_if
+		 <bejocama::is_base_of<bejocama::db::row,S>::value,int>::type>
+std::istream& operator>>(std::istream& is, R&& r)
+{
+	return r.io(is) ? is : is;
+}
+
+template<typename R, typename D, typename S = typename std::decay<R>::type,
+		 typename = typename std::enable_if
+		 <bejocama::is_base_of<bejocama::db::row,S>::value,int>::type>
+decltype(auto) operator>>(R&& r, D&& d)
+{
+	return std::forward<R>(r).set(std::forward<D>(d));
 }

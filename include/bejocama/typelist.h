@@ -138,4 +138,36 @@ namespace bejocama
 	{
 		using type = typelist<typename tl_get<T,P>::type...>;
 	};
+
+	template<typename U, typename S, typename T = S>
+	struct tl_index;
+
+	template<typename U, typename... S, typename... T>
+	struct tl_index<U, typelist<S...>, typelist<T...>>
+	{
+		static constexpr unsigned value =
+			std::is_same<U,typename typelist<T...>::first>::value ? sizeof...(S) - sizeof...(T)
+			: tl_index<U, typelist<S...>, typename typelist<T...>::tail>::value;
+	};
+
+	template<typename U, typename... S>
+	struct tl_index<U, typelist<S...>, typelist<>>
+	{
+		static constexpr unsigned value = 9999;
+	};
+
+	template<typename... T>
+	struct tl_make_tuple;
+
+	template<typename... T>
+	struct tl_make_tuple<typelist<T...>>
+	{
+		using type = std::tuple<T...>;
+	};
+
+	template<typename S, typename T>
+	struct type_index
+	{
+		static constexpr unsigned value = tl_index<S,T>::value;
+	};
 }

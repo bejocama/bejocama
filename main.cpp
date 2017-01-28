@@ -36,21 +36,18 @@ namespace application
 {
 	struct database
 	{
-		struct column_id
+		struct column_id : bejocama::db::numeric_column<unsigned>
 		{
-			using type = unsigned;
 			static constexpr const char* name = "id";
 		};
 
-		struct column_name
+		struct column_name : bejocama::db::string_column<40>
 		{
-			using type = char[40];
 			static constexpr const char* name = "name";
 		};
 
-		struct column_city
+		struct column_city : bejocama::db::string_column<40>
 		{
-			using type = char[40];
 			static constexpr const char* name = "city";
 		};
 
@@ -72,9 +69,13 @@ namespace bejocama
 	{
 		application::database::person::row r;
 
-		r.io(is);
+		auto x = r.get<application::database::column_city>();
+		
+		r.set<application::database::column_city>("Zürich");
+		
+		is >> r;
 
-		r.io(os);
+		os << r;
 	}
 
 	template<typename T>

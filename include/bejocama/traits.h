@@ -107,4 +107,18 @@ namespace bejocama
 	struct is_member_of_return_type<R(C::*)(A...), F> : std::true_type
 	{
 	};
+
+	template<template<typename...> class S, typename T>
+	struct is_base_of
+	{
+		static constexpr bool value = false;
+	};
+	
+	template<template<typename...> class S,
+			 template<typename...> class C,
+			 typename... T>
+	struct is_base_of<S,C<T...>>
+	{
+		static constexpr bool value = std::is_base_of<S<T...>,C<T...>>::value;
+	};
 }
