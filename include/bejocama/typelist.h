@@ -52,11 +52,20 @@ namespace bejocama
 		using tail = typelist<>;
 	};
 
+	template<typename A, typename B>
+	struct tl_concat;
+	
+	template<typename... A, typename... B>
+	struct tl_concat<typelist<A...>, typelist<B...>>
+	{
+		using type = typelist<A..., B...>;
+	};
+	
 	template<typename L, typename A>
 	struct tl_append;
 
-	template<typename A, typename...E>
-	struct tl_append<typelist<E...>, A>
+	template<typename A, typename... E>
+	struct tl_append<typelist<E...>,A>
 	{
 		using type = typelist<E...,A>;
 	};
@@ -166,8 +175,11 @@ namespace bejocama
 	};
 
 	template<typename S, typename T>
-	struct type_index
+	struct type_index;
+
+	template<typename S, template<typename...> class C, typename... T>
+	struct type_index<S,C<T...>>
 	{
-		static constexpr unsigned value = tl_index<S,T>::value;
+		static constexpr unsigned value = tl_index<S,typelist<T...>>::value;
 	};
 }

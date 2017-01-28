@@ -111,9 +111,16 @@ namespace bejocama
 	template<template<typename...> class S, typename T>
 	struct is_base_of
 	{
-		static constexpr bool value = false;
+		static constexpr bool value = is_base_of<S,typelist<T,typename T::types>>::value;
 	};
-	
+
+	template<template<typename...> class S,
+			 typename T, typename... TT>
+	struct is_base_of<S,typelist<T,typelist<TT...>>>
+	{
+		static constexpr bool value = std::is_base_of<S<TT...>,T>::value;
+	};
+		
 	template<template<typename...> class S,
 			 template<typename...> class C,
 			 typename... T>
