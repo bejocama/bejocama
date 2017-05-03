@@ -24,6 +24,7 @@ the close connection between the terms "code sequencing" and
 Status
 ------
 
+ * analysis phase: starting to extend multithreading to multiprocessing (mpi, slurm)
  * functors, fmap, make_type, are the base of compositions
  * a compose function that composes at any argument position
  * a variadic composer which composes at position 0
@@ -34,6 +35,10 @@ Status
 
 Because this approach is composition oriented, restrictions are
 not expected from the theoretical side - if any - not approved yet.
+
+To understand parallelism and composition better, all testing code should
+run with an cluster environment under the control of a jobmanager like
+slurm using mpi capabilities.
 
 Preface
 -------
