@@ -54,8 +54,18 @@ namespace bejocama
 	
 	namespace functor
 	{
-		template<typename I, typename O, typename R>
+		template<typename T>
 		struct fmap
+		{
+			template<typename F, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<P>, typelist<A...>);
+
+			template<typename F, typename... B, typename P, typename... A>
+			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>);
+		};
+		
+		template<typename I, typename O, typename R>
+		struct fmap<typelist<I,O,R>>
 		{
 			template<typename F, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<P>, typelist<A...>)
@@ -81,7 +91,7 @@ namespace bejocama
 		};
 	
 		template<typename T, typename R>
-		struct fmap<T,T,R>
+		struct fmap<typelist<T,T,R>>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -96,7 +106,7 @@ namespace bejocama
 		};
 
 		template<typename T>
-		struct fmap<list<T>,T,void>
+		struct fmap<typelist<list<T>,T,void>>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -118,7 +128,7 @@ namespace bejocama
 		};
 
 		template<typename T, typename R>
-		struct fmap<maybe<T>,T,R>
+		struct fmap<typelist<maybe<T>,T,R>>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -127,10 +137,10 @@ namespace bejocama
 
 					if (!p) return R();
 
-					return fmap<T,T,R>()(std::forward<F>(f),
-											  typelist<B...>{},
-											  typelist<T>{},
-											  typelist<A...>{})
+					return fmap<typelist<T,T,R>>()(std::forward<F>(f),
+												   typelist<B...>{},
+												   typelist<T>{},
+												   typelist<A...>{})
 						(std::forward<B>(b)...,
 						 std::move(*std::forward<P>(p)),
 						 std::forward<A>(a)...);
@@ -139,7 +149,7 @@ namespace bejocama
 		};
 
 		template<typename T, typename R>
-		struct fmap<std::future<T>,T,R>
+		struct fmap<typelist<std::future<T>,T,R>>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -148,7 +158,7 @@ namespace bejocama
 
 					auto l = [&f, &b..., pp=std::move(p), &a...]() mutable {
 
-						return fmap<T,T,R>()
+						return fmap<typelist<T,T,R>>()
 						(std::forward<F>(f),
 						 typelist<B...>{},
 						 typelist<T>{},
@@ -162,7 +172,7 @@ namespace bejocama
 		};
 
 		template<typename T, typename R>
-		struct fmap<std::future<maybe<T>>,T,R>
+		struct fmap<typelist<std::future<maybe<T>>,T,R>>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -173,7 +183,7 @@ namespace bejocama
 				
 						auto ppp = std::move(pp.get());
 
-						return fmap<maybe<T>,T,R>()
+						return fmap<typelist<maybe<T>,T,R>>()
 						(f,
 						 typelist<B...>{},
 						 typelist<decltype(ppp)>{},
@@ -188,7 +198,7 @@ namespace bejocama
 		};
 
 		template<typename T, typename R>
-		struct fmap<std::future<list<T>>,typename list<T>::interface,R>
+		struct fmap<typelist<std::future<list<T>>,typename list<T>::interface,R>>
 		{
 			template<typename F, typename O, typename... A>
 			decltype(auto) operator()(F&& f, typelist<O>, typelist<A...>)
@@ -197,9 +207,9 @@ namespace bejocama
 
 					auto l = [f,oo=std::move(o), &a...]() mutable {
 
-						return fmap<list<T>,
+						return fmap<typelist<list<T>,
 						typename list<T>::interface,
-						R>()
+						R>>()
 						(f, typelist<list<T>>{}, typelist<A...>{})
 						(std::move(oo.get()), std::forward<A>(a)...);
 					};
@@ -210,7 +220,7 @@ namespace bejocama
 		};
 
 		template<typename T>
-		struct fmap<std::future<list<T>>,T,void>
+		struct fmap<typelist<std::future<list<T>>,T,void>>
 		{
 			template<typename F, typename... B, typename P, typename... A>
 			decltype(auto) operator()(F&& f, typelist<B...>, typelist<P>, typelist<A...>)
@@ -221,7 +231,7 @@ namespace bejocama
 
 						auto ppp = std::move(pp.get());
 
-						return fmap<list<T>,T,void>()
+						return fmap<typelist<list<T>,T,void>>()
 						(f,
 						 typelist<B...>{},
 						 typelist<decltype(ppp)>{},
@@ -246,7 +256,7 @@ namespace bejocama
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
 			using MT = typename function_traits<typename clear_type<F>::type>::atype;
 
-			return functor::fmap<IT,OT,RT>()
+			return functor::fmap<typelist<IT,OT,RT>>()
 				(std::forward<F>(f),typelist<IT>{}, MT{})
 				(std::forward<decltype(o)>(o), std::forward<decltype(a)>(a)...);
 		};
@@ -267,7 +277,7 @@ namespace bejocama
 			using AFTER = typename tl_sub<otypes,P+1,N-P-1>::type;
 			using RT = typename function_traits<typename clear_type<F>::type>::rtype;
 
-			return functor::fmap<IT,OT,RT>()
+			return functor::fmap<typelist<IT,OT,RT>>()
 				(std::forward<F>(f),
 				 BEFORE{},
 				 typelist<IT>{},

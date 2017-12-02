@@ -190,6 +190,8 @@ namespace bejocama
 
 int main(int argc, char** argv)
 {
+	bejocama::dbtest();
+	
 	bejocama::test();
 
 	return 0;
