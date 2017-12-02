@@ -24,6 +24,7 @@ the close connection between the terms "code sequencing" and
 Status
 ------
 
+ * starting with tuple based data design
  * analysis phase: starting to extend multithreading to multiprocessing (mpi, slurm)
  * functors, fmap, make_type, are the base of compositions
  * a compose function that composes at any argument position
